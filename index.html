@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>금호동물병원 통합 마취 및 보호자 교육 대시보드</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Internal Stylesheet -->
+    <style>
+        body { 
+            font-family: 'Noto Sans KR', sans-serif; 
+            background-color: #f1f5f9; /* slate-100 */
+        }
+        .card { 
+            background-color: white; 
+            border-radius: 0.75rem; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+            margin-bottom: 1.5rem; 
+        }
+        .input-field { 
+            width: 100%; 
+            padding: 0.75rem; 
+            border: 1px solid #d1d5db; 
+            border-radius: 0.5rem; 
+            font-size: 1.5rem; 
+            text-align: center; 
+            font-weight: 700; 
+        }
+        .large-interactive-field {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1.25rem;
+            text-align: center;
+            font-weight: 600;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+        }
+        .large-interactive-field[type="number"] { -moz-appearance: textfield; }
+        .large-interactive-field[type="number"]::-webkit-inner-spin-button,
+        .large-interactive-field[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .step-card { border-left: 4px solid #2563eb; background-color: #eff6ff; }
+        .warning-card { border-left: 4px solid #f59e0b; background-color: #fffbeb; }
+        .emergency-card { border-left: 4px solid #ef4444; background-color: #fee2e2; }
+        .result-value { font-weight: 700; color: #1e40af; }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        .tab-button { 
+            padding: 0.75rem 1rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            border-bottom: 3px solid transparent; 
+            transition: all 0.3s; 
+            font-size: 0.875rem;
+        }
+        @media (min-width: 640px) { .tab-button { font-size: 1rem; } }
+        .tab-button.active { 
+            color: #2563eb; 
+            border-bottom-color: #2563eb;
+            background-color: #eef2ff;
+        }
+        .tab-content { 
+            display: none; 
+            animation: fadeIn 0.5s; 
+        }
+        .tab-content.active { display: block; }
+        .info-box { background-color: #f9fafb; border: 1px solid #e5e7eb; padding: 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; color: #4b5563; }
+        .result-box { padding: 1.5rem; margin-top: 1.5rem; border-radius: 0.5rem; text-align: center; }
+        .result-box-weight { background-color: #e0f2fe; border-left: 5px solid #0ea5e9; }
+        .result-box-trachea { background-color: #dcfce7; border-left: 5px solid #22c55e; }
+        .gradient-text {
+            background: linear-gradient(to right, #4f46e5, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            max-width: 300px;
+            margin: auto;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="p-2 sm:p-4 md:p-6">
+
+    <div class="max-w-7xl mx-auto">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">통합 마취 &amp; 보호자 교육 대시보드</h1>
+            <p class="mt-2 text-lg text-gray-600">금호동물병원 실전 워크플로우 (Anes AI v4.0)</p>
+        </header>
+
+        <!-- Global Controls -->
+        <div class="card p-6 md:p-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                <div class="w-full">
+                    <label for="weight" class="block text-center text-xl font-semibold text-gray-700 mb-2">환자 체중 (kg)</label>
+                    <input type="number" id="weight" placeholder="체중 입력" class="input-field">
+                </div>
+                 <div class="w-full">
+                    <label for="globalPetName" class="block text-center text-xl font-semibold text-gray-700 mb-2">환자 이름</label>
+                    <input type="text" id="globalPetName" class="input-field" placeholder="이름 입력 (연동)">
+                </div>
+                <div class="w-full">
+                    <button id="saveTabButton" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg shadow-md flex items-center justify-center text-lg transition-transform hover:scale-105">
+                        <i class="fas fa-camera-retro mr-3"></i> 현재 탭 이미지로 저장
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="card p-2 mb-6">
+            <div class="flex flex-wrap justify-center border-b border-gray-200">
+                <button class="tab-button active" data-tab="prepTab"><i class="fas fa-pills mr-2"></i>마취 준비</button>
+                <button class="tab-button" data-tab="emergencyTab"><i class="fas fa-heart-pulse mr-2"></i>응급 대처</button>
+                <button class="tab-button" data-tab="etTubeTab"><i class="fas fa-ruler-vertical mr-2"></i>ET Tube</button>
+                <button class="tab-button" data-tab="dischargeTab"><i class="fas fa-file-prescription mr-2"></i>퇴원약 조제</button>
+                <button class="tab-button" data-tab="protocolTab"><i class="fas fa-book-medical mr-2"></i>노스판 SOP</button>
+                <button class="tab-button" data-tab="stomatitisEducationTab"><i class="fas fa-tooth mr-2"></i>구내염 교육</button>
+                <button class="tab-button" data-tab="cycloEducationTab"><i class="fas fa-pills mr-2"></i>사이클로스포린 교육</button>
+                <button class="tab-button" data-tab="norspanEducationTab"><i class="fas fa-notes-medical mr-2"></i>노스판 패치 교육</button>
+                <button class="tab-button" data-tab="gabaEducationTab"><i class="fas fa-capsules mr-2"></i>가바펜틴 교육</button>
+            </div>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- ======================= TAB CONTENT START ======================= -->
+        <!-- =================================================================== -->
+
+        <!-- 1. Anesthesia Prep Tab -->
+        <div id="prepTab" class="tab-content active">
+            <div class="card p-6 md:p-8">
+                <h2 class="section-title">최종 선택 ET Tube</h2>
+                <div id="et_tube_selection_display" class="p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg mb-6 text-center">
+                    <p class="text-gray-700">ET Tube가 아직 선택되지 않았습니다. 'ET Tube' 탭에서 기록해주세요.</p>
+                </div>
+                <h2 class="section-title">수술 전 약물 준비 (Pre-Anesthetic Drug Prep)</h2>
+                <div class="info-box mb-4"><p><strong>목표:</strong> 마취에 필요한 모든 주사 약물과 수액을 미리 정확한 용량으로 준비하여, 마취 과정 중 실수를 방지하고 신속하게 대처합니다.</p></div>
+                <div id="pre_op_drugs_result" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 text-center">...</div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="card p-6 md:p-8">
+                    <h2 class="section-title">국소마취 (너브 블락) 계산기</h2>
+                    <div class="info-box mb-4"><p><strong>목표:</strong> 수술 부위의 통증 신호를 원천적으로 차단하여 호흡마취제 요구량을 줄이고, 수술 후 통증을 최소화합니다.</p></div>
+                    <div id="dog_nerve_block_result" class="space-y-4">...</div>
+                </div>
+                <div class="card p-6 md:p-8">
+                    <h2 class="section-title">LK-CRI 계산기</h2>
+                    <div class="info-box mb-4"><p><strong>목표:</strong> 리도카인(L)과 케타민(K)을 지속적으로 정맥 주입(CRI)하여, 마취 중 통증 자극을 억제하고 마취를 안정적으로 유지합니다.</p></div>
+                    <div id="lk_cri_calc_result" class="space-y-4">...</div>
+                </div>
+            </div>
+            <div class="card p-6 md:p-8">
+                <h2 class="section-title">마취 워크플로우</h2>
+                <div id="workflow_steps" class="space-y-4">...</div>
+            </div>
+        </div>
+
+        <!-- 2. Emergency Tab -->
+        <div id="emergencyTab" class="tab-content">
+            <div class="card p-6 md:p-8">
+                <h2 class="section-title text-red-600"><i class="fas fa-triangle-exclamation mr-2"></i>마취 중 문제 해결 (Troubleshooting)</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="emergency-card p-4"><h3 class="font-bold text-lg text-red-800">저혈압 &amp; 서맥</h3><div id="hypotension_protocol">...</div><div id="bradycardia_protocol" class="mt-4">...</div></div>
+                    <div class="emergency-card p-4"><h3 class="font-bold text-lg text-red-800">심정지 (CPA) 프로토콜 (RECOVER 기반)</h3><div id="cpa_protocol">...</div></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 3. ET Tube Tab -->
+        <div id="etTubeTab" class="tab-content">
+             <div class="card p-6 md:p-8">
+                <h2 class="section-title">최종 선택 ET Tube 기록</h2>
+                 <div class="bg-gray-100 p-4 rounded-lg mb-8 border border-gray-300"><div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"><div><label for="selectedEtTubeSize" class="block text-sm font-bold text-gray-700 mb-1">✔️ 최종 사이즈 (ID)</label><input type="number" id="selectedEtTubeSize" step="0.5" placeholder="예: 4.5" class="large-interactive-field !text-base"></div><div class="flex flex-col justify-center"><label for="selectedEtTubeCuff" class="flex items-center cursor-pointer"><input type="checkbox" id="selectedEtTubeCuff" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"><span class="ml-2 font-semibold text-gray-700">커프(Cuff) 확인 완료</span></label><label for="selectedEtTubeNotes" class="block text-sm font-bold text-gray-700 mt-2 mb-1">📝 메모</label><input type="text" id="selectedEtTubeNotes" placeholder="예: 커프 약간 샘" class="w-full p-2 border border-gray-300 rounded-md"></div><button id="saveEtTubeSelection" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-blue-700 transition-colors h-full"><i class="fas fa-save mr-2"></i>기록 저장</button></div></div>
+                <h2 class="section-title">ET Tube 사이즈 통합 계산기</h2>
+                <div class="grid md:grid-cols-2 gap-8 mt-6"><div class="flex flex-col gap-8"><div class="bg-gray-50 p-6 rounded-xl border h-full flex flex-col"><h3 class="text-xl font-bold mb-4 text-gray-800">1. 체중으로 계산</h3><div class="flex flex-col sm:flex-row gap-4"><input type="number" id="weight-input" placeholder="체중(kg) 입력" class="large-interactive-field flex-grow !text-lg !font-bold" step="0.1"><button id="calculate-weight-btn" class="w-full sm:w-auto bg-sky-600 text-white font-bold px-6 py-3 rounded-lg text-lg hover:bg-sky-700 transition-colors mt-2 sm:mt-0">확인</button></div><div id="result-container-weight" class="hidden mt-4"><div class="result-box result-box-weight"><p class="text-lg text-sky-800">권장 사이즈</p><p id="result-text-weight" class="text-5xl font-extrabold text-sky-700 my-2"></p></div></div></div><div class="bg-gray-50 p-6 rounded-xl border"><h3 class="text-xl font-bold mb-4 text-center text-gray-800">체중별 사이즈 가이드</h3><div class="overflow-x-auto"><table class="w-full text-center text-xs sm:text-sm"><thead class="bg-gray-200"><tr><th class="px-2 py-2">~1kg</th><th class="px-2 py-2">2kg</th><th class="px-2 py-2">3.5kg</th><th class="px-2 py-2">4+kg</th><th class="px-2 py-2">6kg</th><th class="px-2 py-2">8kg</th></tr></thead><tbody class="divide-x divide-gray-200 bg-white"><tr class="font-bold text-base sm:text-lg"><td class="px-2 py-3">3.0</td><td class="px-2 py-3">3.5</td><td class="px-2 py-3">4.0</td><td class="px-2 py-3">4.5</td><td class="px-2 py-3">5.5</td><td class="px-2 py-3">6</td></tr></tbody><thead class="bg-gray-200"><tr><th class="px-2 py-2">9kg</th><th class="px-2 py-2">12kg</th><th class="px-2 py-2">14kg</th><th class="px-2 py-2">20kg</th><th class="px-2 py-2">30kg</th><th class="px-2 py-2">40kg</th></tr></thead><tbody class="divide-x divide-gray-200 bg-white"><tr class="font-bold text-base sm:text-lg"><td class="px-2 py-3">7</td><td class="px-2 py-3">7</td><td class="px-2 py-3">7.5</td><td class="px-2 py-3">9</td><td class="px-2 py-3">11</td><td class="px-2 py-3">13</td></tr></tbody></table></div></div></div><div class="flex flex-col gap-8"><div class="bg-gray-50 p-6 rounded-xl border h-full flex flex-col"><h3 class="text-xl font-bold mb-4 text-gray-800">2. 기관 직경으로 계산 (T1 X-ray)</h3><div class="flex flex-col sm:flex-row gap-4"><input type="number" id="trachea-input" placeholder="기관 직경(mm) 입력" class="large-interactive-field flex-grow !text-lg !font-bold" step="0.01"><button id="calculate-trachea-btn" class="w-full sm:w-auto bg-green-600 text-white font-bold px-6 py-3 rounded-lg text-lg hover:bg-green-700 transition-colors mt-2 sm:mt-0">확인</button></div><div id="result-container-trachea" class="hidden mt-4"><div class="result-box result-box-trachea"><p class="text-lg text-green-800">권장 사이즈 (ID)</p><p id="result-text-trachea" class="text-5xl font-extrabold text-green-700 my-2"></p></div></div></div><div class="bg-gray-50 p-6 rounded-xl border"><h3 class="text-xl font-bold mb-4 text-center text-gray-800">기관 직경별 사이즈 가이드</h3><div class="overflow-x-auto"><table class="w-full text-center text-sm"><thead class="bg-gray-200"><tr><th class="px-3 py-2">기관 직경(mm)</th><th class="px-3 py-2">ET Tube ID</th></tr></thead><tbody class="divide-y divide-gray-200 bg-white"><tr><td class="px-3 py-2">~ 5.13</td><td class="px-3 py-2 font-bold">2.5</td></tr><tr><td class="px-3 py-2">~ 5.88</td><td class="px-3 py-2 font-bold">3.0</td></tr><tr><td class="px-3 py-2">~ 6.63</td><td class="px-3 py-2 font-bold">3.5</td></tr><tr><td class="px-3 py-2">~ 7.50</td><td class="px-3 py-2 font-bold">4.0</td></tr><tr><td class="px-3 py-2">~ 8.13</td><td class="px-3 py-2 font-bold">4.5</td></tr><tr><td class="px-3 py-2">~ 8.38</td><td class="px-3 py-2 font-bold">5.0</td></tr><tr><td class="px-3 py-2">~ 9.13</td><td class="px-3 py-2 font-bold">5.5</td></tr><tr><td class="px-3 py-2">~ 10.00</td><td class="px-3 py-2 font-bold">6.0</td></tr><tr><td class="px-3 py-2">~ 11.38</td><td class="px-3 py-2 font-bold">6.5</td></tr><tr><td class="px-3 py-2">~ 11.63</td><td class="px-3 py-2 font-bold">7.0</td></tr><tr><td class="px-3 py-2">~ 12.50</td><td class="px-3 py-2 font-bold">7.5</td></tr><tr><td class="px-3 py-2">~ 13.38</td><td class="px-3 py-2 font-bold">8.0</td></tr></tbody></table></div></div></div></div>
+                <div class="text-center mt-8 p-4 bg-yellow-100 border border-yellow-300 rounded-lg"><p class="text-yellow-800 font-semibold">※ 이 결과는 일반적인 가이드이며, 실제 적용 시에는 환자의 품종, 체형, 기도 상태 등을 종합적으로 고려해야 합니다.</p></div>
+            </div>
+        </div>
+
+        <!-- 4. Discharge Meds Tab -->
+        <div id="dischargeTab" class="tab-content">
+            <div class="card p-6 md:p-8">
+                <h2 class="section-title">수술 후 퇴원약 조제</h2>
+                <div class="info-box mb-4"><p><strong>목표:</strong> 환자가 집으로 돌아간 후에도 통증 없이 편안하게 회복할 수 있도록, 환자 상태에 맞는 최적의 약물을 정확한 용량으로 조제합니다.</p></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start"><div><label for="prescription_days" class="block text-center text-xl font-semibold text-gray-700 mb-2">총 처방일수</label><input type="number" id="prescription_days" value="7" class="input-field"></div><div id="discharge_gold">...</div></div>
+                <div id="discharge_alt" class="mt-6">...</div>
+            </div>
+        </div>
+        
+        <!-- 5. Norspan Protocol Tab -->
+        <div id="protocolTab" class="tab-content">
+            <div id="patch_recommendation" class="mb-6"></div>
+            <div class="card p-6 md:p-8"><header class="border-b-2 border-blue-600 pb-4 mb-8"><h1 class="text-3xl md:text-4xl font-bold text-blue-800">부프레노르핀 패치 임상 프로토콜 (SOP)</h1><p class="text-lg text-gray-600 mt-2">금호동물병원 | 최종 개정일: 2025-08-02</p></header><section class="mb-10"><h2 class="text-2xl font-bold text-gray-800 border-l-4 border-blue-500 pl-3 mb-4">1. 목적 (Purpose)</h2><p class="text-gray-700">본 지침은 고양이 환자에게 중등도 이상의 수술 후 통증 또는 만성 통증 관리를 위해 부프레노르핀 경피 패치를 안전하고 효과적으로 사용하는 표준 절차를 확립하는 것을 목적으로 한다.</p></section><section class="mb-10"><h2 class="text-2xl font-bold text-gray-800 border-l-4 border-blue-500 pl-3 mb-4">2. 적용 대상 및 금기</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="bg-green-50 p-4 rounded-lg border border-green-200"><h3 class="text-lg font-bold text-green-800 mb-2">✅ 적용 대상 (Indications)</h3><ul class="list-disc list-inside space-y-1 text-gray-700"><li><strong>주 적용 동물:</strong> 고양이</li><li><strong>수술 후 통증 관리:</strong> 전발치, 정형외과 수술, 개복술 등</li><li><strong>만성 통증 관리:</strong> 퇴행성 관절 질환(DJD), 종양성 통증, 만성 구내염</li><li><strong>만성 신부전(CKD) 환자의 통증 관리</strong></li></ul></div><div class="bg-red-50 p-4 rounded-lg border border-red-200"><h3 class="text-lg font-bold text-red-800 mb-2">❌ 금기 및 주의 (Contraindications &amp; Cautions)</h3><ul class="list-disc list-inside space-y-1 text-gray-700"><li><strong>개:</strong> 흡수율의 예측 불가능성</li><li><strong>급성/중증 통증의 단독 치료</strong></li><li>체온 조절 이상(고체온/저체온) 환자</li><li>부착 부위 피부 질환 또는 상처</li><li><strong>심각한 간 기능 부전 환자</strong> (용량 조절 및 집중 모니터링 필요)</li></ul></div></div></section><section class="mb-10"><h2 class="text-2xl font-bold text-gray-800 border-l-4 border-blue-500 pl-3 mb-4">3. 용량 계산 및 선택</h2><div class="bg-blue-50 p-4 rounded-lg mb-6"><p class="font-bold text-blue-800 text-center text-lg">목표 용량 (Target Dose): 5-10 mcg/kg/hour</p></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse"><thead class="bg-gray-200"><tr><th class="p-3 font-bold uppercase text-gray-600 border border-gray-300">체중 (kg)</th><th class="p-3 font-bold uppercase text-gray-600 border border-gray-300">시간당 필요 용량 (mcg/h)</th><th class="p-3 font-bold uppercase text-gray-600 border border-gray-300">추천 패치 (노스판®)</th><th class="p-3 font-bold uppercase text-gray-600 border border-gray-300">임상적 고려사항</th></tr></thead><tbody><tr class="hover:bg-gray-50"><td class="p-3 text-gray-800 border border-gray-300">~ 3.0 kg</td><td class="p-3 text-gray-800 border border-gray-300">15 ~ 30</td><td class="p-3 text-gray-800 border border-gray-300 font-semibold">5 mcg/h 1매</td><td class="p-3 text-gray-800 border border-gray-300">목표 용량에 미달할 수 있으므로, 반드시 다른 진통제(가바펜틴 등)와 병용해야 합니다.</td></tr><tr class="hover:bg-gray-50"><td class="p-3 text-gray-800 border border-gray-300">3.1 ~ 6.0 kg</td><td class="p-3 text-gray-800 border border-gray-300">15.5 ~ 60</td><td class="p-3 text-gray-800 border border-gray-300 font-semibold">10 mcg/h 1매</td><td class="p-3 text-gray-800 border border-gray-300">체중 범위가 넓어 용량 부족 가능성이 높습니다. **적극적인 다중 진통 프로토콜이 필수적입니다.**</td></tr><tr class="hover:bg-gray-50"><td class="p-3 text-gray-800 border border-gray-300">&gt; 6.0 kg</td><td class="p-3 text-gray-800 border border-gray-300">30+</td><td class="p-3 text-gray-800 border border-gray-300 font-semibold">20 mcg/h 1매</td><td class="p-3 text-gray-800 border border-gray-300">패치 단독 사용은 부적절합니다. **다른 진통 요법의 보조적인 수단으로만 사용합니다.**</td></tr></tbody></table></div><div class="bg-red-600 text-white text-center font-bold p-3 rounded-lg mt-6">🚨 경고: 패치는 절대 자르지 말 것 (NEVER CUT THE PATCH)! 약물 방출 조절막이 파괴되어 과용량(Dose Dumping) 위험이 있습니다.</div></section></div>
+        </div>
+        
+        <!-- 6. Stomatitis Education Tab -->
+        <div id="stomatitisEducationTab" class="tab-content">
+            <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden p-4 sm:p-6 md:p-8">
+                <header class="text-center mb-10"><h1 id="stomatitisTitle" class="text-3xl sm:text-4xl font-extrabold mb-2 gradient-text">우리 아이를 위한<br>만성 구내염 및 전발치 안내서</h1><p class="text-slate-500">사랑하는 반려묘의 건강한 삶을 위한 중요한 안내입니다.</p></header>
+                <section class="mb-12"><h2 class="text-2xl font-bold text-indigo-700 border-l-4 border-indigo-500 pl-4 mb-6">전발치는 왜 최선의 선택일 수 있을까요?</h2><div class="bg-slate-50 p-6 rounded-lg"><p class="mb-4">고양이 만성 구내염(FCGS)은 면역계가 구강 내 세균에 과민 반응하여 극심한 염증과 통증을 유발하는 질병입니다.</p><p class="mb-4">내과적 치료만으로는 한계가 있으며, 통증의 원인인 치아를 제거하여 면역 반응을 줄이는 **전발치가 가장 근본적인 치료법**입니다.</p><div class="flex items-start sm:items-center text-red-600 font-semibold p-4 bg-red-50 rounded-lg"><span>치료 목표는 아이를 통증에서 해방시켜 '삶의 질'을 되찾아주는 것입니다.</span></div></div></section>
+                <section class="mb-12"><h2 class="text-2xl font-bold text-indigo-700 border-l-4 border-indigo-500 pl-4 mb-6">전발치 후 기대 결과 (통계)</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center"><div class="chart-container"><canvas id="prognosisChart"></canvas></div><div><ul class="space-y-4"><li class="flex items-start"><div class="w-4 h-4 rounded-full bg-green-500 mt-1.5 mr-3"></div><div><strong class="text-green-600">완전 회복 (~60%)</strong><br>수술 후 약물 없이 건강한 상태 유지.</div></li><li class="flex items-start"><div class="w-4 h-4 rounded-full bg-yellow-500 mt-1.5 mr-3"></div><div><strong class="text-yellow-600">현저한 개선 (~30%)</strong><br>삶의 질 크게 향상, 간헐적 약물 관리 필요.</div></li><li class="flex items-start"><div class="w-4 h-4 rounded-full bg-red-500 mt-1.5 mr-3"></div><div><strong class="text-red-600">부분적 개선 (~10%)</strong><br>통증은 줄지만 지속적인 약물 치료 필요.</div></li></ul></div></div></section>
+                <section class="mb-12"><h2 class="text-2xl font-bold text-indigo-700 border-l-4 border-indigo-500 pl-4 mb-6">수술 후 관리</h2><div class="bg-slate-50 p-6 rounded-lg space-y-4"><p>면역계가 안정되기까지 <strong class="text-indigo-600">최소 2개월</strong>의 꾸준한 내원과 모니터링이 매우 중요합니다. 저희 병원은 아이의 완전한 회복을 위해 끝까지 책임지고 돕겠습니다.</p></div></section>
+            </div>
+        </div>
+
+        <!-- 7. Cyclosporine Education Tab -->
+        <div id="cycloEducationTab" class="tab-content">
+             <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden p-4 sm:p-6 md:p-8">
+                <header class="text-center mb-8"><h1 id="cyclosporineTitle" class="text-3xl sm:text-4xl font-black" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);-webkit-background-clip: text;-webkit-text-fill-color: transparent;">✨ 사이클로스포린 복약 안내문 ✨</h1><p class="mt-2 text-lg text-gray-600">❤️ 우리 아이의 건강하고 행복한 삶을 위한 약속 ❤️</p></header>
+                <section class="mb-12"><h2 class="text-2xl font-bold text-purple-700 border-l-4 border-purple-500 pl-4 mb-6">사이클로스포린, 어떤 약인가요?</h2><p class="bg-slate-50 p-6 rounded-lg text-gray-700 leading-relaxed">과민 반응하는 면역계를 안정시키는 **면역조절제**입니다. 아토피 피부염의 가려움증이나 난치성 구내염의 통증을 근본적으로 개선하여 삶의 질을 높여줍니다.</p></section>
+                <section class="mb-12"><h2 class="text-2xl font-bold text-purple-700 border-l-4 border-purple-500 pl-4 mb-6">권장 용량 계산</h2><div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4"><input type="number" id="cycloPetWeight" class="w-full p-2 border-2 border-slate-300 rounded-lg text-center" placeholder="⚖️ 몸무게(kg) 입력"><input type="number" id="cycloDuration" class="w-full p-2 border-2 border-slate-300 rounded-lg text-center" placeholder="🗓️ 복용 기간(일) 입력"></div><div id="cycloDoseResult" class="p-6 rounded-lg text-center bg-purple-50"><p class="text-gray-700">👆 정보를 입력하면 자동으로 계산됩니다.</p></div></section>
+                <section class="mb-12"><h2 class="text-2xl font-bold text-purple-700 border-l-4 border-purple-500 pl-4 mb-6">4대 핵심 투여 원칙</h2><div class="space-y-3"><div><strong>1. 매일 같은 시간:</strong> 안정적인 약효를 위해 필수입니다.</div><div><strong>2. 공복 상태 투여:</strong> 식사 2시간 전/후에 투여해야 흡수율이 높습니다.</div><div><strong>3. 칭찬과 보상:</strong> 쓴 약을 먹은 아이에게 작은 간식으로 좋은 기억을 만들어주세요.</div><div><strong>4. 처방 준수:</strong> 임의로 용량을 바꾸거나 중단하지 마세요.</div></div></section>
+            </div>
+        </div>
+
+        <!-- 8. Norspan Patch Education Tab -->
+        <div id="norspanEducationTab" class="tab-content">
+            <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden p-4 sm:p-6 md:p-8">
+                <header class="text-center mb-10"><h1 class="text-3xl md:text-4xl font-bold text-blue-800">금호동물병원</h1><h2 id="norspanTitle" class="text-xl md:text-2xl font-semibold text-gray-700 mt-3">우리 아이를 위한 통증 관리 패치 안내문</h2></header>
+                <div class="border-y border-gray-200 py-5 mb-10 space-y-4"><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><input type="date" id="attachDate" class="flex-grow p-2 border border-gray-300 rounded-md cursor-pointer"><input type="time" id="attachTime" class="flex-grow p-2 border border-gray-300 rounded-md cursor-pointer"></div><div id="removalInfo" class="mt-4 p-4 bg-yellow-100 rounded-lg text-center"><p class="font-bold text-yellow-900">날짜와 시간을 입력하면 제거일이 계산됩니다.</p></div></div>
+                <p class="text-gray-700 mb-10 text-center">아이가 통증 없이 회복하도록 **'부프레노르핀' 성분의 지속형 진통 패치**를 부착했습니다. 아래 내용을 잘 읽고 보살펴 주세요.</p>
+                <div class="mb-10"><h3 class="text-2xl font-bold text-gray-800 text-center mb-4">👀 관찰 포인트</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div><h4 class="font-bold text-green-700">✅ 괜찮아요</h4><ul class="list-disc list-inside text-sm"><li>잠이 늘거나 얌전해짐</li><li>말이 많아지거나 몸을 비빔</li><li>동공 확장, 식욕 약간 저하</li></ul></div><div><h4 class="font-bold text-red-700">🚨 연락주세요</h4><ul class="list-disc list-inside text-sm"><li>숨을 헐떡임 (분당 40회 이상)</li><li>몸을 못 가누고 축 늘어짐</li><li>구토/설사 3회 이상 반복</li><li>패치가 떨어지거나 훼손됨</li></ul></div></div></div>
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-5 rounded-md"><h3 class="text-xl font-bold text-yellow-900 mb-3">🔥 보호자님 필수 수칙</h3><ol class="list-decimal list-inside space-y-2"><li><strong>열 주의:</strong> 전기장판, 핫팩 등 패치에 열이 가해지면 약물이 과다 흡수되어 위험합니다.</li><li><strong>패치 보호:</strong> 아이가 핥거나 긁지 않도록 넥카라, 환자복을 착용시켜 주세요.</li><li><strong>안전한 폐기:</strong> 제거 시 반으로 접어 아이 손이 닿지 않는 곳에 버려주세요.</li></ol></div>
+            </div>
+        </div>
+        
+        <!-- 9. Gabapentin Education Tab -->
+        <div id="gabaEducationTab" class="tab-content">
+            <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+                <header class="bg-indigo-600 text-white p-8 text-center rounded-t-2xl"><h1 class="text-3xl font-bold" id="gabapentinTitle"><span>우리 아이</span><span>를</span> 위한 편안한 진료 준비 안내서</h1><p class="opacity-90 mt-2">스트레스를 줄여 더 안전하고 정확한 진료를 받기 위한 과정입니다.</p></header>
+                <div class="p-8"><div class="mb-10"><h2 class="text-2xl font-bold text-gray-800 mb-4">💊 약 복용 후 정상 반응</h2><p class="text-gray-600 mb-6">처방된 약은 불안과 긴장을 완화시킵니다. 아래 모습은 정상적인 약효 반응이니 걱정하지 마세요.</p><div class="grid md:grid-cols-2 gap-4 text-center"><div><h3 class="font-bold">꾸벅꾸벅 졸림</h3></div><div><h3 class="font-bold">몸을 살짝 비틀거림</h3></div><div><h3 class="font-bold">반응이 둔해짐</h3></div><div><h3 class="font-bold">동공 확장</h3></div></div></div><div><h2 class="text-2xl font-bold text-gray-800 mb-4">🚨 안전을 위한 필수 수칙</h2><ul class="list-disc list-inside space-y-2"><li><strong class="text-red-600">안전한 공간에 격리:</strong> 약 복용 후에는 높은 곳에서 떨어질 위험이 있으니, 바닥이 안전한 공간에 있도록 해주세요.</li><li><strong class="text-red-600">시간 엄수:</strong> 안내받은 투약 및 금식 시간을 반드시 지켜주세요.</li></ul></div></div>
+            </div>
+        </div>
+        
+        <!-- =================================================================== -->
+        <!-- ======================== TAB CONTENT END ======================== -->
+        <!-- =================================================================== -->
+
+        <!-- Common Footer -->
+        <footer class="p-4 sm:p-6 mt-8 border-t-2 border-slate-200 text-center bg-white rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold text-slate-800">궁금하거나 걱정되는 점이 있다면?</h3>
+            <p class="text-slate-600 mt-2">주저 말고 아래 연락처로 문의해 주세요.</p>
+            <div class="mt-6 bg-slate-50 rounded-lg p-6 inline-block shadow-sm">
+                <p class="font-bold text-lg text-indigo-700">금호동물병원</p>
+                <p class="text-slate-700 mt-2">📞 <a href="tel:062-383-7572" class="hover:underline">062-383-7572</a></p>
+                <a href="https://pf.kakao.com/_jiICK/chat" target="_blank" class="mt-4 inline-block w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-lg">카카오톡 문의</a>
+            </div>
+        </footer>
+
+    </div>
+    
+    <!-- External Javascript -->
+    <script src="script.js"></script>
+</body>
+</html>
