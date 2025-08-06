@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🩺 통합 마취 대시보드 v5.3 - 금호동물병원 (오류 수정)</title>
+    <title>🩺 통합 마취 대시보드 v4.0 - 금호동물병원</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -28,10 +28,7 @@
         .large-interactive-field[type="number"] { -moz-appearance: textfield; }
         .large-interactive-field[type="number"]::-webkit-inner-spin-button,
         .large-interactive-field[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        .patient-status-group label { margin-right: 15px; font-size: 1.1rem; user-select: none; cursor:pointer; font-weight:500; }
-        .patient-status-group input { width: 1.2em; height: 1.2em; margin-right: 5px; vertical-align: middle; cursor:pointer;}
-        .kidney-warning { border: 2px solid #ef4444 !important; background-color: #fee2e2 !important; }
-        .kidney-warning h3 { color: #b91c1c !important; }
+
         .step-card { border-left: 5px solid #3b82f6; background-color: #eff6ff; }
         .warning-card { border-left: 5px solid #f59e0b; background-color: #fffbeb; }
         .emergency-card { border-left: 5px solid #ef4444; background-color: #fee2e2; }
@@ -50,7 +47,7 @@
         .result-box-weight { background-color: #e0f2fe; border-left: 6px solid #0ea5e9; }
         .result-box-trachea { background-color: #dcfce7; border-left: 6px solid #22c55e; }
         .action-button {
-            font-weight: bold; padding: .75rem 1.5rem; border-radius: 0.5rem; font-size: 1.125rem; line-height: 1.75rem; transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 300ms;
+            font-bold py-3 px-6 rounded-lg text-lg transition-all duration-300 ease-in-out;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .action-button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
@@ -71,7 +68,7 @@
 
     <div class="max-w-7xl mx-auto">
         <header class="text-center mb-8">
-            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800">🩺 통합 마취 대시보드 v5.3</h1>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800">🩺 통합 마취 대시보드 v4.0</h1>
             <p class="mt-2 text-lg text-gray-600">🏥 금호동물병원 실전 워크플로우 (Anes AI)</p>
         </header>
 
@@ -79,20 +76,15 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-center">
                 <div>
                     <label for="weight" class="block text-center text-xl font-semibold text-gray-700 mb-2">⚖️ 환자 체중 (kg)</label>
-                    <input type="number" id="weight" placeholder="체중 입력" class="input-field">
+                    <input type="number" id="weight" placeholder="체중 입력" class="input-field" oninput="calculateAll()">
                 </div>
-                <div class="text-center">
-                    <label class="block text-xl font-semibold text-gray-700 mb-3">❤️‍🩹 환자 상태 (중복 선택 가능)</label>
-                    <div class="patient-status-group">
-                        <label><input type="checkbox" name="patient_status" value="cardiac"> 심장 질환</label>
-                        <label><input type="checkbox" name="patient_status" value="kidney"> 신장수치 이상</label>
-                        <label><input type="checkbox" name="patient_status" value="liver"> 간수치 이상</label>
-                    </div>
+                <div>
+                    <label for="patient_status" class="block text-center text-xl font-semibold text-gray-700 mb-2">❤️‍🩹 환자 상태</label>
+                    <select id="patient_status" class="input-field" onchange="calculateAll()">
+                        <option value="healthy" selected>튼튼! 건강한 환자 (ASA 1-2)</option>
+                        <option value="cardiac">😥 심장 질환 의심/확진</option>
+                    </select>
                 </div>
-            </div>
-             <div class="mt-6 max-w-lg mx-auto">
-                <label for="patientName" class="block text-center text-md font-semibold text-gray-700 mb-1">📋 환자 이름</label>
-                <input type="text" id="patientName" placeholder="환자 이름 입력" class="w-full p-2 border-2 border-gray-300 rounded-md text-center text-lg">
             </div>
         </div>
 
@@ -100,7 +92,6 @@
             <div class="flex flex-wrap justify-around border-b-2 border-gray-200">
                 <button class="tab-button active" onclick="openTab(event, 'prepTab')"><i class="fas fa-pills mr-2"></i>💊 마취 준비</button>
                 <button class="tab-button" onclick="openTab(event, 'emergencyTab')"><i class="fas fa-heart-pulse mr-2"></i>🆘 응급상황 대처</button>
-                <button class="tab-button" onclick="openTab(event, 'etco2Tab')"><i class="fas fa-wind mr-2"></i>🌬️ EtCO2 대처</button>
                 <button class="tab-button" onclick="openTab(event, 'etTubeTab')"><i class="fas fa-ruler-vertical mr-2"></i>📏 ET Tube 계산기</button>
                 <button class="tab-button" onclick="openTab(event, 'dischargeTab')"><i class="fas fa-file-prescription mr-2"></i>📝 퇴원약 조제</button>
                 <button class="tab-button" onclick="openTab(event, 'protocolTab')"><i class="fas fa-book-medical mr-2"></i>📖 노스판 프로토콜</button>
@@ -109,12 +100,9 @@
         </div>
 
         <div id="prepTab" class="tab-content active">
-            <div class="no-print p-4 mb-4 bg-gray-100 rounded-lg flex flex-wrap gap-4 justify-center">
+            <div class="no-print p-4 mb-4 bg-gray-100 rounded-lg flex justify-center">
                 <button onclick="exportPrepSheetAsImage()" class="bg-green-600 hover:bg-green-700 text-white action-button flex items-center justify-center">
-                    <i class="fas fa-camera mr-2"></i> 📸 이미지로 저장
-                </button>
-                <button onclick="savePrepSheetAsJSON()" class="bg-indigo-600 hover:bg-indigo-700 text-white action-button flex items-center justify-center">
-                    <i class="fas fa-file-code mr-2"></i> 💾 JSON으로 저장
+                    <i class="fas fa-camera mr-2"></i> 📸 마취 준비 시트 이미지로 저장
                 </button>
             </div>
 
@@ -162,10 +150,6 @@
                 </div>
             </div>
         </div>
-
-        <div id="etco2Tab" class="tab-content">
-            <!-- 이 내용은 script.js에서 동적으로 채워집니다 -->
-        </div>
         
         <div id="etTubeTab" class="tab-content">
             <div class="card p-6 md:p-8">
@@ -196,7 +180,7 @@
                         <div class="bg-gray-50 p-6 rounded-xl border h-full flex flex-col">
                             <h3 class="text-xl font-bold mb-4 text-gray-800">1️⃣ 체중으로 계산</h3>
                             <div class="flex flex-col sm:flex-row gap-4">
-                                <input type="number" id="weight-input" placeholder="체중(kg) 입력" class="large-interactive-field flex-grow !text-lg !font-bold" step="0.1">
+                                <input type="number" id="weight-input" placeholder="체중(kg) 입력" class="large-interactive-field flex-grow !text-lg !font-bold" step="0.1" oninput="calculateWeightSize()">
                                 <button id="calculate-weight-btn" class="w-full sm:w-auto bg-sky-600 text-white action-button mt-2 sm:mt-0">수동 확인</button>
                             </div>
                             <div id="result-container-weight" class="hidden mt-4">
@@ -233,7 +217,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                     <div>
                         <label for="prescription_days" class="block text-center text-xl font-semibold text-gray-700 mb-2">🗓️ 총 처방일수</label>
-                        <input type="number" id="prescription_days" value="7" class="input-field">
+                        <input type="number" id="prescription_days" value="7" class="input-field" oninput="calculateAll()">
                     </div>
                     <div id="discharge_gold">...</div>
                 </div>
@@ -251,7 +235,6 @@
                 <section class="mb-10"><h2 class="section-title">🎯 1. 목적 (Purpose)</h2><p>...</p></section>
                 <section class="mb-10"><h2 class="section-title">🔍 2. 적용 대상 및 금기</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-6">...</div></section>
                 <section class="mb-10"><h2 class="section-title">🧮 3. 용량 계산 및 선택</h2><div class="bg-blue-50 p-4 rounded-lg mb-6"><p>...</p></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse">...</table></div><div class="bg-red-600 text-white text-center font-bold p-4 rounded-lg mt-6 text-lg">🚨 경고: 패치는 절대 자르지 말 것 (NEVER CUT THE PATCH)! 약물 방출 조절막이 파괴되어 과용량(Dose Dumping) 위험이 있습니다.</div></section>
-                 <section class="mb-10"><h2 class="section-title">✅ 4. 적용 절차 (중요)</h2><ol class="list-decimal list-inside space-y-4 text-gray-700 text-lg"><li><strong>타이밍:</strong> 진통 효과가 필요한 시점으로부터 <strong>최소 6~12시간 전</strong>에 부착하는 것을 원칙으로 합니다. (예: 오전 중성화 수술 시, 전날 저녁 부착)</li><li><strong>부위 선정:</strong> 털이 적고 환자가 핥기 어려운 곳을 선택합니다 (<strong>가슴 측면, 등 쪽</strong> 추천).</li><li><strong>피부 준비:</strong><ul class="list-disc list-inside ml-8 mt-2 space-y-1"><li>#40 클리퍼 날을 이용하여 피부에 자극이 가지 않도록 조심스럽게 털을 제거합니다.</li><li>오직 <strong>물 또는 생리식염수</strong>를 거즈에 묻혀 부드럽게 닦아낸 후, 마른 거즈로 완벽하게 건조시킵니다.</li><li class="font-bold text-red-600">알코올, 베타딘, 클로르헥시딘 등 소독제나 세제는 피부의 지질층을 변화시켜 약물 흡수에 영향을 주므로 <strong class="underline">절대 사용 금지</strong>합니다.</li></ul></li><li><strong>부착:</strong> 반드시 장갑을 착용한 상태에서 패치를 개봉하고, 접착면을 만지지 않도록 주의하며 부착합니다. 부착 후 손바닥 전체를 이용해 <strong>30~60초간 꾸준히 지그시 눌러</strong> 체온으로 패치가 피부에 완전히 밀착되도록 합니다.</li></ol></section>
             </div>
         </div>
 
@@ -263,13 +246,8 @@
                 </div>
                 <div id="captureArea" class="bg-white rounded-xl shadow-lg p-6 sm:p-10 border border-gray-200">
                     <header class="text-center mb-10"><h1 class="text-3xl md:text-4xl font-bold text-blue-800">🏥 금호동물병원</h1><h2 class="text-xl md:text-2xl font-semibold text-gray-700 mt-3">💌 우리 아이를 위한 통증 관리 패치 안내문</h2></header>
-                    <div class="border-y border-gray-200 py-5 mb-10 space-y-4">
-                        <div class="flex items-center"><label for="patientNameEdu" class="font-semibold text-gray-600 mr-3 w-24 text-right">환자 이름:</label><input type="text" id="patientNameEdu" placeholder="아이 이름" class="flex-grow p-2 border-b-2 border-gray-200 focus:outline-none focus:border-blue-500"></div>
-                        <div class="flex items-center"><label for="attachDate" class="font-semibold text-gray-600 mr-3 w-24 text-right">부착 날짜:</label><input type="date" id="attachDate" class="flex-grow p-2 border-b-2 border-gray-200 focus:outline-none focus:border-blue-500"></div>
-                        <div class="flex items-center"><label for="attachTime" class="font-semibold text-gray-600 mr-3 w-24 text-right">부착 시간:</label><input type="time" id="attachTime" class="flex-grow p-2 border-b-2 border-gray-200 focus:outline-none focus:border-blue-500"></div>
-                        <div id="removalInfo" class="mt-4 p-4 bg-yellow-100 border-2 border-yellow-400 rounded-lg text-center"><p class="font-bold text-yellow-900">제거일이 계산됩니다.</p></div>
-                    </div>
-                    <p class="text-gray-700 text-base md:text-lg mb-10 text-center leading-relaxed">우리 아이가 수술 후 통증 없이 편안하게 회복할 수 있도록, **'부프레노르핀' 성분의 진통 패치**를 부착했습니다. 아래 안내사항을 꼭 읽고 지켜주세요.</p>
+                    <div class="border-y border-gray-200 py-5 mb-10 space-y-4">...</div>
+                    <p class="text-gray-700 text-base md:text-lg mb-10 text-center leading-relaxed">...</p>
                     <div class="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-md mb-10"><h3 class="text-xl font-bold text-blue-900 mb-2">✅ 이 패치는 어떤 역할을 하나요?</h3><ul class="list-disc list-inside text-gray-700 space-y-2 text-base"><li>진통제가 서서히 방출되어, 아이가 통증 없이 편안하게 지낼 수 있도록 돕는 <strong>'지속형 진통 패치'</strong>입니다.</li><li>잦은 주사나 약 복용의 스트레스를 줄여주는 장점이 있습니다.</li></ul></div>
                     <div class="mb-10">
                         <h3 class="text-2xl font-bold text-gray-800 text-center mb-4">👀 우리 아이, 이렇게 관찰해주세요!</h3><p class="text-center text-gray-500 mb-6">아이의 행동 변화는 약효가 잘 나타나고 있다는 긍정적인 신호일 수 있습니다. 너무 걱정하지 마세요!</p>
@@ -278,8 +256,8 @@
                             <div class="bg-red-50 rounded-lg p-5 border border-red-200"><h4 class="text-xl font-bold text-red-800 flex items-center mb-3">😥 이런 모습은 바로 연락주세요</h4><ul class="list-disc list-inside space-y-3 text-gray-700"><li><strong>😮‍💨 숨을 헐떡이거나 힘겹게 쉬어요.</strong><br><span class="text-sm text-gray-500">호흡이 분당 40회 이상으로 지속될 때</span></li><li><strong>😵 몸을 전혀 움직이지 못하고 축 늘어져요.</strong><br><span class="text-sm text-gray-500">이름을 불러도 반응이 거의 없을 때</span></li><li><strong>🤢 구토나 설사를 3회 이상 반복해요.</strong><br><span class="text-sm text-gray-500">탈수나 다른 문제의 신호일 수 있습니다.</span></li><li><strong>🩹 패치가 떨어졌거나, 아이가 핥거나 씹고 있어요.</strong><br><span class="text-sm text-gray-500">과용량 위험이 있으니 즉시 연락주세요.</span></li></ul></div>
                         </div>
                     </div>
-                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-5 rounded-md mb-10"><h3 class="text-xl font-bold text-yellow-900 mb-3">🔥 보호자님, 이것만은 꼭! 지켜주세요</h3><ol class="list-decimal list-inside text-gray-700 space-y-3"><li><strong>1. 가장 중요! 열 주의 🔥</strong><br><strong>전기장판, 핫팩, 온열 드라이기 등</strong> 패치 부위에 열이 가해지지 않도록 **절대적으로** 주의해주세요. 약물이 한꺼번에 과다 흡수되어 매우 위험할 수 있습니다.</li><li><strong>2. 패치 보호 🛡️</strong><br>아이가 패치를 핥거나, 긁거나, 떼어내지 않도록 지켜봐 주세요. 병원에서 붙여드린 <strong>보호 필름이나 환자복을 유지</strong>해주세요.</li><li><strong>3. 안전한 환경 👨‍👩‍👧‍👦</strong><br>패치를 만진 후에는 반드시 손을 씻어주세요. 다른 동물이나 어린아이가 패치에 접촉하지 않도록 주의가 필요합니다.</li><li><strong>4. 안전한 폐기 🗑️</strong><br>제거한 패치는 접착면을 반으로 접어 다른 사람이나 동물이 접촉할 수 없도록 안전하게 버려주세요.</li></ol></div>
-                    <footer class="border-t-2 border-gray-200 pt-8 text-center"><h3 class="text-xl font-semibold text-gray-800">궁금하거나 걱정되는 점이 있다면?</h3><div class="mt-4 bg-gray-50 rounded-lg p-4 inline-block"><p class="font-bold text-lg text-blue-800">금호동물병원</p><p>📞 <a href="tel:062-333-7575">062-333-7575</a></p></div></footer>
+                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-5 rounded-md mb-10"><h3 class="text-xl font-bold text-yellow-900 mb-3">🔥 보호자님, 이것만은 꼭! 지켜주세요</h3><ol class="list-decimal list-inside text-gray-700 space-y-3"><li><strong>1. 가장 중요! 열 주의 🔥</strong><br>...</li><li><strong>2. 패치 보호 🛡️</strong><br>...</li><li><strong>3. 안전한 환경 👨‍👩‍👧‍👦</strong><br>...</li><li><strong>4. 안전한 폐기 🗑️</strong><br>...</li></ol></div>
+                    <footer class="border-t-2 border-gray-200 pt-8 text-center">...</footer>
                 </div>
             </div>
         </div>
