@@ -66,17 +66,10 @@ function updatePatchRecommendation(weight) {
     const recommendationDiv = document.getElementById('patch_recommendation');
     if (!recommendationDiv) return;
     let patchType = '', patchColor = 'gray';
-    
-    // *** 요청사항 반영: 패치 추천 용량 기준 변경 ***
-    if (weight > 0 && weight <= 3) { 
-        patchType = '5 mcg/h'; patchColor = 'blue'; 
-    } else if (weight > 3 && weight <= 6) { 
-        patchType = '10 mcg/h'; patchColor = 'green'; 
-    } else if (weight > 6) { 
-        patchType = '20 mcg/h'; patchColor = 'red'; 
-    } else { 
-        recommendationDiv.innerHTML = ''; return; 
-    }
+    if (weight > 0 && weight <= 3) { patchType = '5 mcg/h'; patchColor = 'blue'; } 
+    else if (weight > 3 && weight <= 6) { patchType = '10 mcg/h'; patchColor = 'green'; } 
+    else if (weight > 6) { patchType = '20 mcg/h'; patchColor = 'red'; } 
+    else { recommendationDiv.innerHTML = ''; return; }
     recommendationDiv.innerHTML = `<div class="p-4 rounded-lg bg-${patchColor}-100 border-l-4 border-${patchColor}-500"><h3 class="text-xl font-bold text-${patchColor}-800 flex items-center"><i class="fas fa-syringe mr-3"></i>🩹 환자 맞춤 패치 추천</h3><p class="text-lg text-gray-800 mt-2">현재 체중 <strong>${weight}kg</strong> 환자에게는 <strong>${patchType} 노스판 패치</strong> 적용을 권장합니다.</p></div>`;
 }
 
@@ -100,18 +93,14 @@ function populatePrepTab(weight) {
     const fluidCorrected = fluidTarget / pumpCorrectionFactor;
     
     const selectedAbxKey = document.getElementById('antibiotic_choice')?.value || 'baytril50';
-    let abxMl = 0, abxDoseText = '';
-    if (selectedAbxKey.includes('baytril')) { abxDoseText = "2.5mg/kg"; abxMl = (2.5 * weight) / concentrations[selectedAbxKey]; } 
-    else if (selectedAbxKey === 'cephron') { abxDoseText = "2.2mg/kg"; abxMl = (2.2 * weight) / concentrations[selectedAbxKey]; }
+    let abxMl = 0;
+    if (selectedAbxKey.includes('baytril')) { abxMl = (2.5 * weight) / concentrations[selectedAbxKey]; } 
+    else if (selectedAbxKey === 'cephron') { abxMl = (2.2 * weight) / concentrations[selectedAbxKey]; }
 
     prepTab.innerHTML = `
         <div class="no-print p-4 mb-4 bg-gray-100 rounded-lg flex flex-wrap justify-center gap-4">
-            <button onclick="exportPrepSheetAsImage()" class="bg-green-600 hover:bg-green-700 text-white action-button flex items-center justify-center">
-                <i class="fas fa-camera mr-2"></i> 📸 이미지로 저장
-            </button>
-            <button onclick="savePrepSheetAsJSON()" class="bg-indigo-600 hover:bg-indigo-700 text-white action-button flex items-center justify-center">
-                <i class="fas fa-file-code mr-2"></i> 💾 JSON으로 기록 저장
-            </button>
+            <button onclick="exportPrepSheetAsImage()" class="bg-green-600 hover:bg-green-700 text-white action-button flex items-center justify-center"><i class="fas fa-camera mr-2"></i> 📸 이미지로 저장</button>
+            <button onclick="savePrepSheetAsJSON()" class="bg-indigo-600 hover:bg-indigo-700 text-white action-button flex items-center justify-center"><i class="fas fa-file-code mr-2"></i> 💾 JSON으로 기록 저장</button>
         </div>
         <div class="card p-6 md:p-8">
             <h2 class="section-title">📌 최종 선택 ET Tube</h2>
@@ -121,7 +110,12 @@ function populatePrepTab(weight) {
                  <div class="p-3 bg-green-50 rounded-lg"><h4 class="font-bold text-green-800">구토 예방/진통보조</h4><p><span class="result-value">${cereniaMl.toFixed(2)} mL</span> (세레니아)</p></div>
                  <div class="p-3 bg-teal-50 rounded-lg"><h4 class="font-bold text-teal-800">예방적 항생제</h4><select id="antibiotic_choice" class="w-full border rounded p-1 mt-1 text-sm bg-white" onchange="calculateAll()"><option value="baytril50">바이트릴 50주</option><option value="baytril25">바이트릴 25주</option><option value="cephron">세프론 세븐</option></select><p class="mt-1"><span class="result-value">${abxMl.toFixed(2)} mL</span></p></div>
                  <div class="p-3 bg-blue-50 rounded-lg"><h4 class="font-bold text-blue-800">😌 마취 전 투약</h4><p><span class="result-value">${butorMl.toFixed(2)} mL</span> 부토르파놀</p><p><span class="result-value">${midaMl.toFixed(2)} mL</span> 미다졸람</p></div>
-                 <div class="p-3 bg-amber-50 rounded-lg"><h4 class="font-bold text-amber-800">⚡ LK 부하 용량</h4><p><span class="result-value">${lidoLoadMl.toFixed(2)} mL</span> 리도카인</p><p><span class="result-value">${ketaLoadMl_diluted.toFixed(2)} mL</span> 케타민(희석)</p></div>
+                 <div class="p-3 bg-amber-50 rounded-lg">
+                    <h4 class="font-bold text-amber-800">⚡ LK 부하 용량</h4>
+                    <p><span class="result-value">${lidoLoadMl.toFixed(2)} mL</span> 리도카인</p>
+                    <p><span class="result-value">${ketaLoadMl_diluted.toFixed(2)} mL</span> 케타민(희석)</p>
+                    <p class="text-xs text-gray-600 font-semibold mt-1">※ 희석: 케타민 0.1mL + N/S 0.9mL</p>
+                 </div>
                  <div class="p-3 bg-indigo-50 rounded-lg"><h4 class="font-bold text-indigo-800">💤 마취 유도제 ${status.cardiac ? '<span class="text-red-500">(추천)</span>' : ''}</h4><p><span class="result-value">${alfaxanMlMin.toFixed(2)}~${alfaxanMlMax.toFixed(2)} mL</span> 알팍산</p></div>
                  <div class="p-3 bg-purple-50 rounded-lg"><h4 class="font-bold text-purple-800">💤 마취 유도제</h4><p><span class="result-value">${propofolMlMin.toFixed(2)}~${propofolMlMax.toFixed(2)} mL</span> 프로포폴</p></div>
                  <div class="p-3 bg-cyan-50 rounded-lg"><h4 class="font-bold text-cyan-800">💧 수액 펌프</h4><p><span class="result-value">${fluidCorrected.toFixed(1)} mL/hr</span></p><p class="text-xs text-gray-500 mt-1">(목표: ${fluidTarget.toFixed(1)}mL/hr)</p></div>
@@ -187,28 +181,11 @@ function populateDischargeTab(weight) {
 function populateProtocolTab(weight) {
     const protocolTab = document.getElementById('protocolTab');
     const status = getPatientStatus();
-
-    // *** 요청사항 반영: 간수치 이상 환자 경고 메시지 생성 ***
     let liverWarningHTML = '';
     if (status.liver) {
-        liverWarningHTML = `
-            <div class="warning-card p-4 my-6 rounded-lg">
-                <h3 class="font-bold text-lg text-amber-800 flex items-center">
-                    <i class="fas fa-exclamation-triangle mr-3"></i>⚠️ 간수치 이상 환자 주의
-                </h3>
-                <p class="text-amber-700 mt-2">
-                    부프레노르핀은 주로 간에서 대사됩니다. <strong>간 기능 저하 환자</strong>의 경우 약물 작용 시간이 길어지거나 부작용 위험이 증가할 수 있습니다.
-                    패치 적용 시 용량 조절을 고려하고, 환자 상태를 더욱 면밀히 모니터링해야 합니다. (프로토콜 7번 항목 참조)
-                </p>
-            </div>
-        `;
+        liverWarningHTML = `<div class="warning-card p-4 my-6 rounded-lg"><h3 class="font-bold text-lg text-amber-800 flex items-center"><i class="fas fa-exclamation-triangle mr-3"></i>⚠️ 간수치 이상 환자 주의</h3><p class="text-amber-700 mt-2">부프레노르핀은 간에서 대사되므로 간 기능 저하 환자에게는 용량 조절 및 면밀한 모니터링이 필요합니다.</p></div>`;
     }
-
-    protocolTab.innerHTML = `
-        <div id="patch_recommendation" class="mb-6"></div>
-        ${liverWarningHTML}
-        <div id="protocol_content_wrapper"></div>
-    `;
+    protocolTab.innerHTML = `<div id="patch_recommendation" class="mb-6"></div>${liverWarningHTML}<div id="protocol_content_wrapper"></div>`;
     document.getElementById('protocol_content_wrapper').innerHTML = document.getElementById('노스판_프로토콜_템플릿').innerHTML;
     updatePatchRecommendation(weight);
 }
