@@ -20,14 +20,13 @@ function calculateAll() {
     const weight = parseFloat(weightInput.value);
 
     if (!weight || weight <= 0) {
-        const tabs = document.querySelectorAll('.tab-content');
-        tabs.forEach(tab => {
-            if (tab.id === 'etTubeTab' || tab.id === 'protocolTab' || tab.id === 'educationTab') {
-                 // 템플릿 기반 탭은 비우지 않음
-            } else {
-                 tab.innerHTML = '<p class="text-gray-500 p-8 text-center text-xl">상단에서 환자 체중을 먼저 입력해주세요.</p>';
-            }
+        const tabsToClear = ['prepTab', 'emergencyTab', 'etco2Tab', 'dischargeTab'];
+        tabsToClear.forEach(tabId => {
+            const tab = document.getElementById(tabId);
+            if (tab) tab.innerHTML = '<p class="text-gray-500 p-8 text-center text-xl">상단에서 환자 체중을 먼저 입력해주세요.</p>';
         });
+        // 템플릿 기반 탭은 구조 유지를 위해 초기화만 진행
+        populateEtTubeTab();
         const weightInputTube = document.getElementById('weight-input');
         if (weightInputTube) {
             weightInputTube.value = '';
@@ -66,6 +65,8 @@ function updatePatchRecommendation(weight) {
     const recommendationDiv = document.getElementById('patch_recommendation');
     if (!recommendationDiv) return;
     let patchType = '', patchColor = 'gray';
+    
+    // 변경된 패치 추천 용량 기준
     if (weight > 0 && weight <= 3) { patchType = '5 mcg/h'; patchColor = 'blue'; } 
     else if (weight > 3 && weight <= 6) { patchType = '10 mcg/h'; patchColor = 'green'; } 
     else if (weight > 6) { patchType = '20 mcg/h'; patchColor = 'red'; } 
