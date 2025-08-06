@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🩺 통합 마취 대시보드 v5.4 - 금호동물병원</title>
+    <title>🩺 통합 마취 대시보드 v5.5 - 금호동물병원</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -28,6 +28,10 @@
         .tab-content.active { display: block; }
         .action-button { font-weight: bold; padding: 0.75rem 1.5rem; border-radius: 0.5rem; text-lg; transition: all 0.3s ease-in-out; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .action-button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+        .guide-table { width: 100%; text-align: center; border-collapse: collapse; }
+        .guide-table th, .guide-table td { border: 1px solid #e5e7eb; padding: 0.75rem 0.5rem; }
+        .guide-table thead th { background-color: #f3f4f6; font-weight: 600; color: #4b5563; }
+        .guide-table tbody td { font-weight: 700; font-size: 1.1rem; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
@@ -35,7 +39,7 @@
 
     <div class="max-w-7xl mx-auto">
         <header class="text-center mb-8">
-            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800">🩺 통합 마취 대시보드 v5.4</h1>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800">🩺 통합 마취 대시보드 v5.5</h1>
             <p class="mt-2 text-lg text-gray-600">🏥 금호동물병원 실전 워크플로우 (Anes AI)</p>
         </header>
 
@@ -69,7 +73,97 @@
     
     <div id="templates" style="display: none;">
         <div id="et_tube_템플릿">
-            <div class="card p-6 md:p-8"><h2 class="section-title">✍️ 최종 ET Tube 기록</h2><div class="bg-gray-100 p-6 rounded-lg mb-8"><div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"><div><label for="selectedEtTubeSize" class="block font-bold mb-2">✔️ 최종 사이즈 (ID)</label><input type="number" id="selectedEtTubeSize" step="0.5" class="large-interactive-field !text-base"></div><div class="pt-2"><label class="flex items-center cursor-pointer mb-3"><input type="checkbox" id="selectedEtTubeCuff" class="h-6 w-6 rounded"><span class="ml-3 font-semibold">💨 커프(Cuff) 확인</span></label><label for="selectedEtTubeNotes" class="block font-bold mb-1">📝 메모</label><input type="text" id="selectedEtTubeNotes" class="w-full p-2 border-2 rounded-md"></div><button id="saveEtTubeSelection" class="bg-blue-600 text-white action-button h-full"><i class="fas fa-save mr-2"></i>💾 기록 저장</button></div></div><h2 class="section-title">⚙️ ET Tube 사이즈 계산기</h2><div class="grid md:grid-cols-2 gap-8 mt-6"><div><div class="bg-gray-50 p-6 rounded-xl border h-full"><h3 class="text-xl font-bold mb-4">1️⃣ 체중으로 계산</h3><div class="flex gap-4"><input type="number" id="weight-input" class="large-interactive-field flex-grow !text-lg !font-bold" step="0.1"><button id="calculate-weight-btn" class="bg-sky-600 text-white action-button">확인</button></div><div id="result-container-weight" class="hidden mt-4"><div class="p-4 bg-sky-50 border-l-4 border-sky-400 text-center"><p class="text-lg">권장 사이즈</p><p id="result-text-weight" class="text-5xl font-extrabold text-sky-700 my-2"></p></div></div></div></div><div><div class="bg-gray-50 p-6 rounded-xl border h-full"><h3 class="text-xl font-bold mb-4">2️⃣ 기관 직경으로 계산 (X-ray)</h3><div class="flex gap-4"><input type="number" id="trachea-input" class="large-interactive-field flex-grow !text-lg !font-bold" step="0.01"><button id="calculate-trachea-btn" class="bg-green-600 text-white action-button">확인</button></div><div id="result-container-trachea" class="hidden mt-4"><div class="p-4 bg-green-50 border-l-4 border-green-400 text-center"><p class="text-lg">권장 사이즈 (ID)</p><p id="result-text-trachea" class="text-5xl font-extrabold text-green-700 my-2"></p></div></div></div></div></div><div class="text-center mt-8 p-4 bg-yellow-100 border rounded-lg"><p class="font-semibold">⚠️ ※ 이 결과는 가이드이며, 환자 상태를 종합적으로 고려해야 합니다.</p></div></div>
+            <div class="card p-6 md:p-8">
+                <h2 class="section-title">✍️ 최종 선택 ET Tube 기록</h2>
+                <div class="bg-gray-100 p-6 rounded-lg mb-8 border border-gray-300">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <div><label for="selectedEtTubeSize" class="block font-bold mb-2">✔️ 최종 사이즈 (ID)</label><input type="number" id="selectedEtTubeSize" step="0.5" class="large-interactive-field !text-base"></div>
+                        <div class="pt-2"><label class="flex items-center cursor-pointer mb-3"><input type="checkbox" id="selectedEtTubeCuff" class="h-6 w-6 rounded"><span class="ml-3 font-semibold">💨 커프(Cuff) 확인</span></label><label for="selectedEtTubeNotes" class="block font-bold mb-1">📝 메모</label><input type="text" id="selectedEtTubeNotes" class="w-full p-2 border-2 rounded-md"></div>
+                        <button id="saveEtTubeSelection" class="bg-blue-600 hover:bg-blue-700 text-white action-button h-full"><i class="fas fa-save mr-2"></i>💾 기록 저장</button>
+                    </div>
+                </div>
+                
+                <h2 class="section-title">⚙️ ET Tube 사이즈 통합 계산기</h2>
+                <div class="grid md:grid-cols-2 gap-8 mt-6">
+                    <!-- 체중 계산기 및 가이드 -->
+                    <div class="flex flex-col gap-8">
+                        <div class="bg-gray-50 p-6 rounded-xl border h-full flex flex-col">
+                            <h3 class="text-xl font-bold mb-4 text-gray-800">1️⃣ 체중으로 계산</h3>
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <input type="number" id="weight-input" placeholder="체중(kg)" class="large-interactive-field flex-grow !text-lg !font-bold" step="0.1">
+                                <button id="calculate-weight-btn" class="bg-sky-600 hover:bg-sky-700 text-white action-button mt-2 sm:mt-0">확인</button>
+                            </div>
+                            <div id="result-container-weight" class="hidden mt-4">
+                                <div class="p-4 bg-sky-50 border-l-4 border-sky-400 text-center">
+                                    <p class="text-lg">권장 사이즈</p>
+                                    <p id="result-text-weight" class="text-5xl font-extrabold text-sky-700 my-2"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border">
+                            <h3 class="text-xl font-bold mb-4 text-center text-gray-800">⚖️ 체중별 사이즈 가이드</h3>
+                            <div class="overflow-x-auto">
+                                <table class="guide-table">
+                                    <thead>
+                                        <tr><th>~1kg</th><th>2kg</th><th>3.5kg</th><th>4kg</th><th>6kg</th><th>8kg</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td>3.0</td><td>3.5</td><td>4.0</td><td>4.5</td><td>5.5</td><td>6.0</td></tr>
+                                    </tbody>
+                                    <thead>
+                                        <tr><th>9kg</th><th>12kg</th><th>14kg</th><th>20kg</th><th>30kg</th><th>40kg</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td>7.0</td><td>7.0</td><td>7.5</td><td>9.0</td><td>11.0</td><td>13.0</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 기관 직경 계산기 및 가이드 -->
+                    <div class="flex flex-col gap-8">
+                        <div class="bg-gray-50 p-6 rounded-xl border h-full flex flex-col">
+                            <h3 class="text-xl font-bold mb-4 text-gray-800">2️⃣ 기관 직경으로 계산 (X-ray)</h3>
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <input type="number" id="trachea-input" placeholder="기관 직경(mm)" class="large-interactive-field flex-grow !text-lg !font-bold" step="0.01">
+                                <button id="calculate-trachea-btn" class="bg-green-600 hover:bg-green-700 text-white action-button mt-2 sm:mt-0">확인</button>
+                            </div>
+                            <div id="result-container-trachea" class="hidden mt-4">
+                                <div class="p-4 bg-green-50 border-l-4 border-green-400 text-center">
+                                    <p class="text-lg">권장 사이즈 (ID)</p>
+                                    <p id="result-text-trachea" class="text-5xl font-extrabold text-green-700 my-2"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border">
+                             <h3 class="text-xl font-bold mb-4 text-center text-gray-800">📏 기관 직경별 사이즈 가이드</h3>
+                             <div class="overflow-x-auto">
+                                 <table class="guide-table">
+                                     <thead><tr><th>기관 직경(mm)</th><th>ET Tube ID</th></tr></thead>
+                                     <tbody>
+                                         <tr><td>~ 5.13</td><td>2.5</td></tr>
+                                         <tr><td>~ 5.88</td><td>3.0</td></tr>
+                                         <tr><td>~ 6.63</td><td>3.5</td></tr>
+                                         <tr><td>~ 7.50</td><td>4.0</td></tr>
+                                         <tr><td>~ 8.13</td><td>4.5</td></tr>
+                                         <tr><td>~ 8.38</td><td>5.0</td></tr>
+                                         <tr><td>~ 9.13</td><td>5.5</td></tr>
+                                         <tr><td>~ 10.00</td><td>6.0</td></tr>
+                                         <tr><td>~ 11.38</td><td>6.5</td></tr>
+                                         <tr><td>~ 11.63</td><td>7.0</td></tr>
+                                         <tr><td>~ 12.50</td><td>7.5</td></tr>
+                                         <tr><td>~ 13.38</td><td>8.0</td></tr>
+                                     </tbody>
+                                 </table>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-8 p-4 bg-yellow-100 border rounded-lg">
+                    <p class="font-semibold">※ 이 결과는 일반적인 가이드이며, 실제 적용 시에는 환자의 품종, 체형, 기도 상태 등을 종합적으로 고려해야 합니다.</p>
+                </div>
+            </div>
         </div>
         
         <div id="노스판_프로토콜_템플릿">
