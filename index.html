@@ -3,69 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🩺 통합 마취 대시보드 v5.2 - 금호동물병원</title>
+    <title>🩺 통합 마취 대시보드 v5.3 - 금호동물병원</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8f9fa; color: #212529; }
-        .card { background-color: white; border-radius: 1rem; box-shadow: 0 8px 24px rgba(22, 28, 45, 0.06); margin-bottom: 1.5rem; transition: transform 0.2s ease-in-out; }
-        .card:hover { transform: translateY(-3px); }
-        .input-field {
-            width: 100%; padding: 0.75rem; border: 2px solid #dee2e6; border-radius: 0.75rem; font-size: 1.75rem; text-align: center; font-weight: 700;
-            transition: all 0.3s ease;
-        }
+        .card { background-color: white; border-radius: 1rem; box-shadow: 0 8px 24px rgba(22, 28, 45, 0.06); margin-bottom: 1.5rem; }
+        .input-field { width: 100%; padding: 0.75rem; border: 2px solid #dee2e6; border-radius: 0.75rem; font-size: 1.75rem; text-align: center; font-weight: 700; transition: all 0.3s ease; }
         .input-field:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); outline: none; }
-        .large-interactive-field {
-            width: 100%; padding: 0.75rem; border: 2px solid #dee2e6; border-radius: 0.75rem; font-size: 1.25rem; text-align: center; font-weight: 600;
-            -webkit-appearance: none; -moz-appearance: none; appearance: none;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em;
-            transition: all 0.3s ease;
-        }
+        .large-interactive-field { width: 100%; padding: 0.75rem; border: 2px solid #dee2e6; border-radius: 0.75rem; font-size: 1.25rem; text-align: center; font-weight: 600; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; transition: all 0.3s ease; }
         .large-interactive-field:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); outline: none; }
-        .large-interactive-field[type="number"] { -moz-appearance: textfield; }
-        .large-interactive-field[type="number"]::-webkit-inner-spin-button,
-        .large-interactive-field[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-
         .patient-status-group label { margin-right: 15px; font-size: 1.1rem; user-select: none; cursor:pointer; font-weight: 500;}
         .patient-status-group input { width: 1.2em; height: 1.2em; margin-right: 5px; vertical-align: middle; cursor:pointer;}
-        .kidney-warning { border: 3px solid #ef4444 !important; background-color: #fee2e2 !important; transition: all 0.3s ease; }
+        .kidney-warning { border: 3px solid #ef4444 !important; background-color: #fee2e2 !important; }
         .kidney-warning h3 { color: #b91c1c !important; }
-
         .step-card { border-left: 5px solid #3b82f6; background-color: #eff6ff; }
         .warning-card { border-left: 5px solid #f59e0b; background-color: #fffbeb; }
         .emergency-card { border-left: 5px solid #ef4444; background-color: #fee2e2; }
         .result-value { font-weight: 900; color: #312e81; }
         .section-title { font-size: 1.75rem; font-weight: 900; color: #1e293b; border-bottom: 3px solid #6366f1; padding-bottom: 0.75rem; margin-bottom: 1.5rem; }
-        .tab-button {
-            padding: 0.8rem 1.25rem; font-weight: 700; cursor: pointer; border-bottom: 4px solid transparent; transition: all 0.3s ease-in-out;
-            font-size: 1rem; color: #4b5563;
-        }
+        .tab-button { padding: 0.8rem 1.25rem; font-weight: 700; cursor: pointer; border-bottom: 4px solid transparent; transition: all 0.3s ease-in-out; font-size: 1rem; color: #4b5563; }
         .tab-button:hover { background-color: #f3f4f6; color: #1e293b; }
         .tab-button.active { color: #4f46e5; border-bottom-color: #4f46e5; background-color: #eef2ff; }
         .tab-content { display: none; animation: fadeIn 0.5s; }
         .tab-content.active { display: block; }
         .info-box { background-color: #f9fafb; border: 1px solid #e5e7eb; padding: 1rem; border-radius: 0.75rem; font-size: 0.95rem; color: #374151; }
         .result-box { padding: 1.5rem; margin-top: 1rem; border-radius: 0.75rem; text-align: center; }
-        .result-box-weight { background-color: #e0f2fe; border-left: 6px solid #0ea5e9; }
-        .result-box-trachea { background-color: #dcfce7; border-left: 6px solid #22c55e; }
-        .action-button {
-            font-weight: bold; padding: 0.75rem 1.5rem; border-radius: 0.5rem; text-lg; transition: all 0.3s ease-in-out;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
+        .action-button { font-weight: bold; padding: 0.75rem 1.5rem; border-radius: 0.5rem; text-lg; transition: all 0.3s ease-in-out; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .action-button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @media print {
             body { -webkit-print-color-adjust: exact; color-adjust: exact; background-color: #ffffff; }
             .no-print { display: none; }
-            .card { box-shadow: none; border: 1px solid #ccc; margin-bottom: 1rem; }
-            #educationTab input, #educationTab #patientName {
-                border: none !important; background-color: transparent !important; padding: 0.5rem 0 !important; font-size: 1rem; color: #000000;
-            }
-            #educationTab #removalInfo { border: 2px solid #facc15 !important; }
-            #educationTab #captureArea { box-shadow: none !important; border: none !important; }
+            .card { box-shadow: none; border: 1px solid #ccc; }
+            .section-title { border-bottom: 2px solid #000000; }
         }
     </style>
 </head>
@@ -73,36 +46,26 @@
 
     <div class="max-w-7xl mx-auto">
         <header class="text-center mb-8">
-            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800">🩺 통합 마취 대시보드 v5.2</h1>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800">🩺 통합 마취 대시보드 v5.3</h1>
             <p class="mt-2 text-lg text-gray-600">🏥 금호동물병원 실전 워크플로우 (Anes AI)</p>
         </header>
 
         <div class="card p-6 md:p-8">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-center">
-                <div>
-                    <label for="weight" class="block text-center text-xl font-semibold text-gray-700 mb-2">⚖️ 환자 체중 (kg)</label>
-                    <input type="number" id="weight" placeholder="체중 입력" class="input-field">
-                </div>
-                 <div class="text-center">
-                    <label class="block text-xl font-semibold text-gray-700 mb-3">❤️‍🩹 환자 상태 (중복 선택 가능)</label>
-                    <div class="patient-status-group" onchange="calculateAll()">
-                        <label><input type="checkbox" name="patient_status" value="cardiac"> 심장 질환</label>
-                        <label><input type="checkbox" name="patient_status" value="kidney"> 신장수치 이상</label>
-                        <label><input type="checkbox" name="patient_status" value="liver"> 간수치 이상</label>
-                    </div>
-                </div>
+                <div><label for="weight" class="block text-center text-xl font-semibold text-gray-700 mb-2">⚖️ 환자 체중 (kg)</label><input type="number" id="weight" placeholder="체중 입력" class="input-field"></div>
+                <div class="text-center"><label class="block text-xl font-semibold text-gray-700 mb-3">❤️‍🩹 환자 상태 (중복 선택 가능)</label><div class="patient-status-group" onchange="calculateAll()"><label><input type="checkbox" name="patient_status" value="cardiac"> 심장 질환</label><label><input type="checkbox" name="patient_status" value="kidney"> 신장수치 이상</label><label><input type="checkbox" name="patient_status" value="liver"> 간수치 이상</label></div></div>
             </div>
         </div>
 
         <div class="card p-2 mb-6 sticky top-2 z-10 no-print">
             <div class="flex flex-wrap justify-around border-b-2 border-gray-200">
                 <button class="tab-button active" onclick="openTab(event, 'prepTab')"><i class="fas fa-pills mr-2"></i>💊 마취 준비</button>
-                <button class="tab-button" onclick="openTab(event, 'emergencyTab')"><i class="fas fa-heart-pulse mr-2"></i>🆘 응급상황 대처</button>
-                <button class="tab-button" onclick="openTab(event, 'etco2Tab')"><i class="fas fa-wind mr-2"></i>💨 EtCO2 대처</button>
-                <button class="tab-button" onclick="openTab(event, 'etTubeTab')"><i class="fas fa-ruler-vertical mr-2"></i>📏 ET Tube 계산기</button>
-                <button class="tab-button" onclick="openTab(event, 'dischargeTab')"><i class="fas fa-file-prescription mr-2"></i>📝 퇴원약 조제</button>
-                <button class="tab-button" onclick="openTab(event, 'protocolTab')"><i class="fas fa-book-medical mr-2"></i>📖 노스판 프로토콜</button>
-                <button class="tab-button" onclick="openTab(event, 'educationTab')"><i class="fas fa-user-graduate mr-2"></i>🎓 패치 보호자교육</button>
+                <button class="tab-button" onclick="openTab(event, 'emergencyTab')"><i class="fas fa-heart-pulse mr-2"></i>🆘 응급상황</button>
+                <button class="tab-button" onclick="openTab(event, 'etco2Tab')"><i class="fas fa-wind mr-2"></i>💨 EtCO2</button>
+                <button class="tab-button" onclick="openTab(event, 'etTubeTab')"><i class="fas fa-ruler-vertical mr-2"></i>📏 ET Tube</button>
+                <button class="tab-button" onclick="openTab(event, 'dischargeTab')"><i class="fas fa-file-prescription mr-2"></i>📝 퇴원약</button>
+                <button class="tab-button" onclick="openTab(event, 'protocolTab')"><i class="fas fa-book-medical mr-2"></i>📖 프로토콜</button>
+                <button class="tab-button" onclick="openTab(event, 'educationTab')"><i class="fas fa-user-graduate mr-2"></i>🎓 보호자교육</button>
             </div>
         </div>
         
@@ -111,106 +74,33 @@
         <div id="etco2Tab" class="tab-content"></div>
         <div id="etTubeTab" class="tab-content"></div>
         <div id="dischargeTab" class="tab-content"></div>
-
         <div id="protocolTab" class="tab-content"></div>
         <div id="educationTab" class="tab-content"></div>
     </div>
     
-    <!-- 템플릿 영역: JS가 이 내용을 복사하여 탭에 채웁니다. -->
     <div id="templates" style="display: none;">
-        <!-- ET Tube 탭 템플릿 -->
         <div id="et_tube_템플릿">
-            <div class="card p-6 md:p-8">
-                <h2 class="section-title">✍️ 최종 선택 ET Tube 기록</h2>
-                 <div class="bg-gray-100 p-6 rounded-lg mb-8 border border-gray-300">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                        <div>
-                            <label for="selectedEtTubeSize" class="block text-md font-bold text-gray-700 mb-2">✔️ 최종 사이즈 (ID)</label>
-                            <input type="number" id="selectedEtTubeSize" step="0.5" placeholder="예: 4.5" class="large-interactive-field !text-base">
-                        </div>
-                        <div class="flex flex-col justify-center pt-2">
-                             <label for="selectedEtTubeCuff" class="flex items-center cursor-pointer mb-3">
-                                <input type="checkbox" id="selectedEtTubeCuff" class="h-6 w-6 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                <span class="ml-3 font-semibold text-gray-700 text-lg">💨 커프(Cuff) 확인 완료</span>
-                            </label>
-                            <label for="selectedEtTubeNotes" class="block text-sm font-bold text-gray-700 mb-1">📝 메모</label>
-                            <input type="text" id="selectedEtTubeNotes" placeholder="예: 커프 약간 샘, 조금 더 큰 사이즈 고려" class="w-full p-2 border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-400">
-                        </div>
-                        <button id="saveEtTubeSelection" class="bg-blue-600 text-white action-button h-full">
-                            <i class="fas fa-save mr-2"></i>💾 기록 저장
-                        </button>
-                    </div>
-                </div>
-
-                <h2 class="section-title">⚙️ ET Tube 사이즈 통합 계산기</h2>
-                <div class="grid md:grid-cols-2 gap-8 mt-6">
-                    <div class="flex flex-col gap-8">
-                        <div class="bg-gray-50 p-6 rounded-xl border h-full flex flex-col">
-                            <h3 class="text-xl font-bold mb-4 text-gray-800">1️⃣ 체중으로 계산</h3>
-                            <div class="flex flex-col sm:flex-row gap-4">
-                                <input type="number" id="weight-input" placeholder="체중(kg) 입력" class="large-interactive-field flex-grow !text-lg !font-bold" step="0.1">
-                                <button id="calculate-weight-btn" class="w-full sm:w-auto bg-sky-600 text-white action-button mt-2 sm:mt-0">수동 확인</button>
-                            </div>
-                            <div id="result-container-weight" class="hidden mt-4">
-                                <div class="result-box result-box-weight"><p class="text-lg text-sky-800">권장 사이즈</p><p id="result-text-weight" class="text-5xl font-extrabold text-sky-700 my-2"></p></div>
-                            </div>
-                        </div>
-                    </div>
-    
-                    <div class="flex flex-col gap-8">
-                        <div class="bg-gray-50 p-6 rounded-xl border h-full flex flex-col">
-                            <h3 class="text-xl font-bold mb-4 text-gray-800">2️⃣ 기관 직경으로 계산 (T1 X-ray)</h3>
-                            <div class="flex flex-col sm:flex-row gap-4">
-                                <input type="number" id="trachea-input" placeholder="기관 직경(mm) 입력" class="large-interactive-field flex-grow !text-lg !font-bold" step="0.01">
-                                <button id="calculate-trachea-btn" class="w-full sm:w-auto bg-green-600 text-white action-button mt-2 sm:mt-0">확인</button>
-                            </div>
-                            <div id="result-container-trachea" class="hidden mt-4">
-                                <div class="result-box result-box-trachea"><p class="text-lg text-green-800">권장 사이즈 (ID)</p><p id="result-text-trachea" class="text-5xl font-extrabold text-green-700 my-2"></p></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="text-center mt-8 p-4 bg-yellow-100 border border-yellow-300 rounded-lg">
-                    <p class="text-yellow-800 font-semibold">⚠️ ※ 이 결과는 일반적인 가이드이며, 실제 적용 시에는 환자의 품종, 체형, 기도 상태 등을 종합적으로 고려해야 합니다.</p>
-                </div>
-            </div>
+            <div class="card p-6 md:p-8"><h2 class="section-title">✍️ 최종 선택 ET Tube 기록</h2><div class="bg-gray-100 p-6 rounded-lg mb-8 border border-gray-300"><div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"><div><label for="selectedEtTubeSize" class="block text-md font-bold text-gray-700 mb-2">✔️ 최종 사이즈 (ID)</label><input type="number" id="selectedEtTubeSize" step="0.5" placeholder="예: 4.5" class="large-interactive-field !text-base"></div><div class="flex flex-col justify-center pt-2"><label for="selectedEtTubeCuff" class="flex items-center cursor-pointer mb-3"><input type="checkbox" id="selectedEtTubeCuff" class="h-6 w-6 rounded border-gray-300 text-blue-600 focus:ring-blue-500"><span class="ml-3 font-semibold text-gray-700 text-lg">💨 커프(Cuff) 확인 완료</span></label><label for="selectedEtTubeNotes" class="block text-sm font-bold text-gray-700 mb-1">📝 메모</label><input type="text" id="selectedEtTubeNotes" placeholder="예: 커프 약간 샘" class="w-full p-2 border-2 border-gray-300 rounded-md"></div><button id="saveEtTubeSelection" class="bg-blue-600 hover:bg-blue-700 text-white action-button h-full"><i class="fas fa-save mr-2"></i>💾 기록 저장</button></div></div><h2 class="section-title">⚙️ ET Tube 사이즈 통합 계산기</h2><div class="grid md:grid-cols-2 gap-8 mt-6"><div class="flex flex-col gap-8"><div class="bg-gray-50 p-6 rounded-xl border h-full flex flex-col"><h3 class="text-xl font-bold mb-4 text-gray-800">1️⃣ 체중으로 계산</h3><div class="flex flex-col sm:flex-row gap-4"><input type="number" id="weight-input" placeholder="체중(kg) 입력" class="large-interactive-field flex-grow !text-lg !font-bold" step="0.1"><button id="calculate-weight-btn" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white action-button mt-2 sm:mt-0">확인</button></div><div id="result-container-weight" class="hidden mt-4"><div class="result-box bg-sky-50 border-l-4 border-sky-400"><p class="text-lg text-sky-800">권장 사이즈</p><p id="result-text-weight" class="text-5xl font-extrabold text-sky-700 my-2"></p></div></div></div></div><div class="flex flex-col gap-8"><div class="bg-gray-50 p-6 rounded-xl border h-full flex flex-col"><h3 class="text-xl font-bold mb-4 text-gray-800">2️⃣ 기관 직경으로 계산 (X-ray)</h3><div class="flex flex-col sm:flex-row gap-4"><input type="number" id="trachea-input" placeholder="기관 직경(mm)" class="large-interactive-field flex-grow !text-lg !font-bold" step="0.01"><button id="calculate-trachea-btn" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white action-button mt-2 sm:mt-0">확인</button></div><div id="result-container-trachea" class="hidden mt-4"><div class="result-box bg-green-50 border-l-4 border-green-400"><p class="text-lg text-green-800">권장 사이즈 (ID)</p><p id="result-text-trachea" class="text-5xl font-extrabold text-green-700 my-2"></p></div></div></div></div></div><div class="text-center mt-8 p-4 bg-yellow-100 border border-yellow-300 rounded-lg"><p class="text-yellow-800 font-semibold">⚠️ ※ 이 결과는 일반적인 가이드이며, 환자의 품종, 체형, 기도 상태 등을 종합적으로 고려해야 합니다.</p></div></div>
         </div>
-
-        <!-- 프로토콜 탭 템플릿 -->
+        
         <div id="노스판_프로토콜_템플릿">
             <div id="patch_recommendation" class="mb-6"></div>
             <div class="card p-6 md:p-8">
-                <header class="border-b-2 border-blue-600 pb-4 mb-8 text-center">
-                    <h1 class="text-3xl md:text-4xl font-bold text-blue-800">📜 부프레노르핀 패치 임상 프로토콜 (SOP)</h1>
-                    <p class="text-lg text-gray-600 mt-2">금호동물병원 | 최종 개정일: 2025-08-02</p>
-                </header>
-                <section class="mb-10"><h2 class="section-title">🎯 1. 목적 (Purpose)</h2><p>수술 후 통증, 만성 통증(골관절염, 종양성 통증) 등을 겪는 개와 고양이에게 지속적이고 안정적인 진통 효과를 제공하여 삶의 질을 개선하는 것을 목표로 한다.</p></section>
-                <section class="mb-10"><h2 class="section-title">🔍 2. 적용 대상 및 금기</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">...</div><div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">...</div></div></section>
-                <section class="mb-10"><h2 class="section-title">🧮 3. 용량 계산 및 선택</h2><p>...</p><div class="bg-red-600 text-white text-center font-bold p-4 rounded-lg mt-6 text-lg">🚨 경고: 패치는 절대 자르지 말 것 (NEVER CUT THE PATCH)! 약물 방출 조절막이 파괴되어 과용량(Dose Dumping) 위험이 있습니다.</div></section>
-                <section class="mb-10"><h2 class="section-title">🛠️ 4. 적용 절차</h2><ol class="list-decimal list-inside space-y-3 text-gray-700"><li><strong>타이밍:</strong> 진통 효과가 필요한 시점으로부터 **최소 6~12시간 전**에 부착하는 것을 원칙으로 한다 (예: 수술 전날 저녁 또는 수술 당일 아침 일찍).</li><li><strong>부위 선정:</strong> 털이 적고 환자가 핥거나 긁기 어려운 곳을 선택한다 (**목덜미, 등, 측흉부**가 일반적으로 추천됨).</li><li><strong>피부 준비:</strong><ul class="list-disc list-inside ml-6 mt-1"><li>#40 클리퍼를 사용하여 피부가 손상되지 않도록 부드럽게 털을 제거한다.</li><li>**오직 물이나 생리식염수**로만 패치 부착 부위를 닦아낸 후, 거즈 등으로 완벽하게 건조시킨다.</li><li class="font-bold text-red-600">피부 장벽을 손상시켜 약물 흡수에 영향을 줄 수 있는 알코올, 소독제(클로르헥시딘, 포비돈 등) 사용을 절대 금지한다.</li></ul></li><li><strong>부착:</strong> 의료용 장갑을 착용한다. 보호 필름을 제거한 후 패치의 접착면이 피부에 완전히 닿도록 부착하고, 손바닥으로 **최소 30~60초간 꾸준히 눌러** 체온으로 접착제를 활성화시켜 단단히 밀착시킨다.</li></ol></section>
+                <header class="border-b-2 border-blue-600 pb-4 mb-8"><h1 class="text-3xl md:text-4xl font-bold text-blue-800">부프레노르핀 패치 임상 프로토콜 (SOP)</h1><p class="text-lg text-gray-600 mt-2">금호동물병원 | 최종 개정일: 2025-07-21</p></header>
+                <section class="mb-10"><h2 class="text-2xl font-bold text-gray-800 border-l-4 border-blue-500 pl-3 mb-4">1. 목적 (Purpose)</h2><p class="text-gray-700">본 지침은 고양이 환자에게 중등도 이상의 수술 후 통증 또는 만성 통증 관리를 위해 부프레노르핀 경피 패치를 안전하고 효과적으로 사용하는 표준 절차를 확립하는 것을 목적으로 한다.</p></section>
+                <section class="mb-10"><h2 class="text-2xl font-bold text-gray-800 border-l-4 border-blue-500 pl-3 mb-4">2. 적용 대상 및 금기</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="bg-green-50 p-4 rounded-lg border border-green-200"><h3 class="text-lg font-bold text-green-800 mb-2">✅ 적용 대상</h3><ul class="list-disc list-inside space-y-1 text-gray-700"><li><strong>주 적용 동물:</strong> 고양이</li><li><strong>수술 후 통증 관리:</strong> 전발치, 정형외과 수술, 개복술 등</li><li><strong>만성 통증 관리:</strong> 퇴행성 관절 질환(DJD), 종양성 통증</li><li><strong>만성 신부전(CKD) 환자의 통증 관리</strong></li></ul></div><div class="bg-red-50 p-4 rounded-lg border border-red-200"><h3 class="text-lg font-bold text-red-800 mb-2">❌ 금기 및 주의</h3><ul class="list-disc list-inside space-y-1 text-gray-700"><li><strong>개:</strong> 흡수율의 예측 불가능성</li><li><strong>급성/중증 통증의 단독 치료</strong></li><li>체온 조절 이상(고체온/저체온) 환자</li><li>부착 부위 피부 질환 또는 상처</li><li><strong>심각한 간 기능 부전 환자</strong></li></ul></div></div></section>
+                <section class="mb-10"><h2 class="text-2xl font-bold text-gray-800 border-l-4 border-blue-500 pl-3 mb-4">3. 용량 계산 및 선택</h2><div class="bg-blue-50 p-4 rounded-lg mb-6"><p class="font-bold text-blue-800 text-center text-lg">목표 용량 (Target Dose): 5-10 mcg/kg/hour</p></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse"><thead class="bg-gray-200"><tr><th class="p-3 font-bold uppercase text-gray-600 border border-gray-300">체중 (kg)</th><th class="p-3 font-bold uppercase text-gray-600 border border-gray-300">추천 패치 (노스판®)</th><th class="p-3 font-bold uppercase text-gray-600 border border-gray-300">임상적 고려사항</th></tr></thead><tbody><tr class="hover:bg-gray-50"><td class="p-3 text-gray-800 border border-gray-300">~ 2.0 kg</td><td class="p-3 text-gray-800 border border-gray-300 font-semibold">10 mcg/h 1매</td><td class="p-3 text-gray-800 border border-gray-300">5 mcg/h는 용량 미달 가능성. 부작용 모니터링.</td></tr><tr class="hover:bg-gray-50"><td class="p-3 text-gray-800 border border-gray-300">2.1 ~ 4.0 kg</td><td class="p-3 text-gray-800 border border-gray-300 font-semibold">20 mcg/h 1매</td><td class="p-3 text-gray-800 border border-gray-300">가장 일반적인 적용 범위.</td></tr><tr class="hover:bg-gray-50"><td class="p-3 text-gray-800 border border-gray-300">4.1 ~ 6.0 kg</td><td class="p-3 text-gray-800 border border-gray-300 font-semibold">20 mcg/h 1매</td><td class="p-3 text-gray-800 border border-gray-300">다른 진통제(가바펜틴 등) 병용 필수.</td></tr><tr class="hover:bg-gray-50"><td class="p-3 text-gray-800 border border-gray-300">> 6.0 kg</td><td class="p-3 text-gray-800 border border-gray-300 font-semibold">20 mcg/h 1매</td><td class="p-3 text-gray-800 border border-gray-300">적극적인 다중 진통 프로토콜의 일부로만 사용.</td></tr></tbody></table></div><div class="bg-red-600 text-white text-center font-bold p-3 rounded-lg mt-6">🚨 경고: 패치는 절대 자르지 말 것 (NEVER CUT THE PATCH)!</div></section>
+                <section class="mb-10"><h2 class="text-2xl font-bold text-gray-800 border-l-4 border-blue-500 pl-3 mb-4">4. 적용 절차</h2><ol class="list-decimal list-inside space-y-3 text-gray-700"><li><strong>타이밍:</strong> 진통 효과 필요 시점으로부터 **최소 6~12시간 전** 부착.</li><li><strong>부위 선정:</strong> 털이 적고 핥기 어려운 곳 (**측흉부**가 이상적).</li><li><strong>피부 준비:</strong><ul class="list-disc list-inside ml-6 mt-1"><li>#40 클리퍼로 피부 손상 없이 털 제거.</li><li>**오직 물이나 생리식염수**로만 닦고 완벽히 건조.</li><li class="font-bold text-red-600">알코올, 소독제 사용 절대 금지.</li></ul></li><li><strong>부착:</strong> 장갑 착용 후 패치를 **30~60초간 꾸준히 눌러** 체온으로 밀착.</li><li><strong>기록:</strong> 차트에 부착 날짜, 시간, 부위, 용량 기재.</li></ol></section>
+                <section class="mb-10"><h2 class="text-2xl font-bold text-gray-800 border-l-4 border-blue-500 pl-3 mb-4">5. 작용 시간 및 부작용</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div><h3 class="text-lg font-bold text-gray-700 mb-2">⏰ 작용 시간</h3><ul class="space-y-2"><li><span class="font-bold">발현:</span> 6-12 시간 소요</li><li><span class="font-bold">지속:</span> 3-4일 지속</li><li><span class="font-bold">감소:</span> 제거 후 12시간마다 50%씩 감소</li></ul></div><div><h3 class="text-lg font-bold text-gray-700 mb-2">⚠️ 주요 부작용</h3><ul class="list-disc list-inside space-y-1 text-gray-700"><li><strong>흔함:</strong> 행동 변화(유포리아), 고체온증, 동공산대, 진정</li><li><strong>드묾:</strong> 식욕부진, 구토</li><li><strong>매우 드묾:</strong> 호흡 억제</li></ul></div></div></section>
+                <section class="mb-10"><h2 class="text-2xl font-bold text-gray-800 border-l-4 border-blue-500 pl-3 mb-4">6. 모니터링 및 대처</h2><div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-md"><h3 class="font-bold text-yellow-900 mb-2">🔥 핵심 안전 수칙: 온도 관리</h3><p class="text-yellow-800">환자에게 **전기장판, 핫팩 등 모든 외부 열원 사용을 절대 금지**할 것. 보호자에게 반드시 교육해야 함.</p></div></section>
+                <section class="mb-10"><h2 class="text-2xl font-bold text-gray-800 border-l-4 border-blue-500 pl-3 mb-4">7. 특수 환자군 고려사항</h2><div class="space-y-4"><div><h3 class="text-lg font-bold text-gray-700">간 질환</h3><p>심각한 간 기능 저하 시 용량 감소 또는 투여 간격 연장을 고려.</p></div><div><h3 class="text-lg font-bold text-gray-700">신장 질환</h3><p>CKD 환자의 통증 관리에 NSAIDs보다 안전하고 선호되는 선택지.</p></div></div></section>
+                <section><h2 class="text-2xl font-bold text-gray-800 border-l-4 border-blue-500 pl-3 mb-4">8. 약품 정보 및 비용</h2><div class="overflow-x-auto"><table class="w-full text-left border-collapse"><thead class="bg-gray-200"><tr><th class="p-3 font-bold uppercase text-gray-600 border border-gray-300">제품명</th><th class="p-3 font-bold uppercase text-gray-600 border border-gray-300">포장 단위 가격</th><th class="p-3 font-bold uppercase text-gray-600 border border-gray-300">1매당 예상 비용</th></tr></thead><tbody><tr><td class="p-3 border border-gray-300">노스판패취 5㎍/h</td><td class="p-3 border border-gray-300">30,000원</td><td class="p-3 border border-gray-300 font-semibold">7,500원</td></tr><tr><td class="p-3 border border-gray-300">노스판패취 10㎍/h</td><td class="p-3 border border-gray-300">48,840원</td><td class="p-3 border border-gray-300 font-semibold">12,210원</td></tr><tr><td class="p-3 border border-gray-300">노스판패취 20㎍/h</td><td class="p-3 border border-gray-300">68,900원</td><td class="p-3 border border-gray-300 font-semibold">17,225원</td></tr></tbody></table></div><p class="text-sm text-gray-500 mt-2">* 비용은 2025년 7월 기준이며 변동될 수 있습니다.</p></section>
+                <footer class="text-center mt-10 pt-6 border-t border-gray-300"><p class="text-sm text-gray-500">본 프로토콜은 금호동물병원의 자산이며, 의료진의 전문적 판단을 보조하기 위한 것입니다.</p></footer>
             </div>
         </div>
-
-        <!-- 보호자 교육 탭 템플릿 -->
+        
         <div id="보호자교육_템플릿">
-            <div class="card p-6 md:p-8">
-                 <div class="no-print bg-white p-4 rounded-lg shadow-md mb-6 flex flex-col sm:flex-row gap-3 justify-center">
-                    <button onclick="saveAsPDF()" class="action-button bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center"><i class="fas fa-print mr-2"></i> 🖨️ 인쇄 또는 PDF로 저장</button>
-                    <button onclick="saveAsImage()" class="action-button bg-green-600 hover:bg-green-700 text-white flex items-center justify-center"><i class="fas fa-image mr-2"></i> 🖼️ 이미지(PNG)로 저장</button>
-                </div>
-                <div id="captureArea" class="bg-white rounded-xl shadow-lg p-6 sm:p-10 border border-gray-200">
-                    <header class="text-center mb-10"><h1 class="text-3xl md:text-4xl font-bold text-blue-800">🏥 금호동물병원</h1><h2 class="text-xl md:text-2xl font-semibold text-gray-700 mt-3">💌 우리 아이를 위한 통증 관리 패치 안내문</h2></header>
-                    <div class="border-y border-gray-200 py-5 mb-10 space-y-4">
-                        <div class="flex items-center"><label for="patientName" class="font-semibold text-gray-600 mr-3 w-24 text-right">환자 이름:</label><input type="text" id="patientName" name="patientName" placeholder="아이 이름 입력" class="flex-grow p-2 border border-gray-300 rounded-md"></div>
-                        <div class="flex items-center"><label for="attachDate" class="font-semibold text-gray-600 mr-3 w-24 text-right">부착 날짜:</label><input type="date" id="attachDate" name="attachDate" onchange="calculateRemovalDate()" class="flex-grow p-2 border border-gray-300 rounded-md cursor-pointer"></div>
-                        <div class="flex items-center"><label for="attachTime" class="font-semibold text-gray-600 mr-3 w-24 text-right">부착 시간:</label><input type="time" id="attachTime" name="attachTime" onchange="calculateRemovalDate()" class="flex-grow p-2 border border-gray-300 rounded-md cursor-pointer"></div>
-                        <div id="removalInfo" class="mt-4 p-4 bg-yellow-100 border-2 border-yellow-400 rounded-lg text-center"><p class="font-bold text-yellow-900">제거일이 계산됩니다.</p></div>
-                    </div>
-                    <p class="text-gray-700 text-base md:text-lg mb-10 text-center leading-relaxed">우리 아이가 수술 후 통증 없이 편안하게 회복할 수 있도록, <strong>'부프레노르핀' 성분의 진통 패치</strong>를 부착했습니다. 보호자님의 세심한 관리가 아이의 빠른 회복에 큰 도움이 됩니다.</p>
-                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-5 rounded-md mb-10"><h3 class="text-xl font-bold text-yellow-900 mb-3">🔥 보호자님, 이것만은 꼭! 지켜주세요</h3><ol class="list-decimal list-inside text-gray-700 space-y-3"><li><strong>1. 가장 중요! 열 주의 🔥</strong><br><strong>전기장판, 핫팩, 온열 드라이기, 강한 햇볕 등</strong> 패치 부위에 외부 열이 가해지지 않도록 <strong>절대적으로</strong> 주의해주세요. 열에 의해 약물이 갑자기 과다하게 흡수되어 아이에게 위험할 수 있습니다.</li><li><strong>2. 패치 보호 🛡️</strong><br>아이가 패치를 핥거나, 긁거나, 떼어내지 않도록 지켜봐 주세요. 다른 반려동물이 핥지 않도록 격리가 필요할 수 있습니다. 넥카라나 환자복 착용이 도움이 됩니다.</li><li><strong>3. 안전한 환경 👨‍👩‍👧‍👦</strong><br>어린 아이나 다른 동물이 패치를 만지거나 떼어내지 않도록 주의해주세요.</li><li><strong>4. 안전한 폐기 🗑️</strong><br>제거 시에는 접착면을 반으로 접어 버려주세요. 사용한 패치에도 약물이 남아있으므로 아이나 다른 동물이 접촉하지 않도록 즉시 안전하게 폐기해야 합니다.</li></ol></div>
-                    <footer class="border-t-2 border-gray-200 pt-8 text-center"><h3 class="text-xl font-semibold text-gray-800">궁금하거나 걱정되는 점이 있다면?</h3><p class="mt-2 text-gray-600">언제든지 병원으로 연락주세요.</p><div class="mt-4 bg-gray-100 rounded-lg p-4 inline-block"><p class="font-bold text-2xl text-blue-800">금호동물병원</p><p class="text-lg font-semibold">📞 <a href="tel:062-375-7588" class="hover:text-blue-600">062-375-7588</a></p></div></footer>
-                </div>
-            </div>
+             <div class="card p-6 md:p-8"><div class="no-print bg-white p-4 rounded-lg shadow-md mb-6 flex flex-col sm:flex-row gap-3 justify-center"><button onclick="saveAsPDF()" class="action-button bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center"><i class="fas fa-print mr-2"></i>🖨️ 인쇄/PDF 저장</button><button onclick="saveAsImage()" class="action-button bg-green-600 hover:bg-green-700 text-white flex items-center justify-center"><i class="fas fa-image mr-2"></i>🖼️ 이미지로 저장</button></div><div id="captureArea" class="bg-white rounded-xl shadow-lg p-6 sm:p-10 border border-gray-200"><header class="text-center mb-10"><h1 class="text-3xl md:text-4xl font-bold text-blue-800">🏥 금호동물병원</h1><h2 class="text-xl md:text-2xl font-semibold text-gray-700 mt-3">💌 우리 아이를 위한 통증 관리 패치 안내문</h2></header><div class="border-y border-gray-200 py-5 mb-10 space-y-4"><div class="flex items-center"><label for="patientName" class="font-semibold text-gray-600 mr-3 w-24 text-right">환자 이름:</label><input type="text" id="patientName" name="patientName" placeholder="아이 이름 입력" class="flex-grow p-2 border border-gray-300 rounded-md"></div><div class="flex items-center"><label for="attachDate" class="font-semibold text-gray-600 mr-3 w-24 text-right">부착 날짜:</label><input type="date" id="attachDate" name="attachDate" onchange="calculateRemovalDate()" class="flex-grow p-2 border border-gray-300 rounded-md cursor-pointer"></div><div class="flex items-center"><label for="attachTime" class="font-semibold text-gray-600 mr-3 w-24 text-right">부착 시간:</label><input type="time" id="attachTime" name="attachTime" onchange="calculateRemovalDate()" class="flex-grow p-2 border border-gray-300 rounded-md cursor-pointer"></div><div id="removalInfo" class="mt-4 p-4 bg-yellow-100 border-2 border-yellow-400 rounded-lg text-center"><p class="font-bold text-yellow-900">제거일이 계산됩니다.</p></div></div><p class="text-gray-700 text-base md:text-lg mb-10 text-center leading-relaxed">우리 아이가 수술 후 통증 없이 편안하게 회복할 수 있도록, <strong>'부프레노르핀' 성분의 진통 패치</strong>를 부착했습니다.</p><div class="bg-yellow-50 border-l-4 border-yellow-500 p-5 rounded-md mb-10"><h3 class="text-xl font-bold text-yellow-900 mb-3">🔥 보호자님, 이것만은 꼭! 지켜주세요</h3><ol class="list-decimal list-inside text-gray-700 space-y-3"><li><strong>1. 가장 중요! 열 주의 🔥</strong><br><strong>전기장판, 핫팩 등</strong> 패치 부위에 외부 열이 가해지지 않도록 <strong>절대적으로</strong> 주의해주세요. 약물이 과다 흡수되어 위험할 수 있습니다.</li><li><strong>2. 패치 보호 🛡️</strong><br>아이가 패치를 핥거나, 긁거나, 떼어내지 않도록 지켜봐 주세요.</li></ol></div><footer class="border-t-2 border-gray-200 pt-8 text-center"><h3 class="text-xl font-semibold text-gray-800">궁금하거나 걱정되는 점이 있다면?</h3><div class="mt-4 bg-gray-100 rounded-lg p-4 inline-block"><p class="font-bold text-2xl text-blue-800">금호동물병원</p><p class="text-lg font-semibold">📞 <a href="tel:062-375-7588" class="hover:text-blue-600">062-375-7588</a></p></div></footer></div></div>
         </div>
     </div>
     
