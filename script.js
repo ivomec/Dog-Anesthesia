@@ -71,10 +71,10 @@ function populatePrepTab(weight) {
     if (weight > 0) {
         switch (antibioticSelection) {
             case 'baytril50': antibioticResultHTML = `<p class="text-center"><span class="result-value">${(weight * 0.05).toFixed(2)} mL</span></p>`; break;
-            case 'cephron7': antibioticResultHTML = `<p class="text-center"><span class="result-value">${(weight * 0.05).toFixed(2)} mL</span></p>`; break; // 수정됨
+            case 'cephron7': antibioticResultHTML = `<p class="text-center"><span class="result-value">${(weight * 0.05).toFixed(2)} mL</span></p>`; break;
             case 'baytril25': antibioticResultHTML = `<p class="text-center"><span class="result-value">${(weight * 0.1).toFixed(2)} mL</span></p>`; break;
             case 'baytril50_dexa': antibioticResultHTML = `<div class="text-sm space-y-1"><div class="flex justify-between"><span>바이트릴 50주:</span><span class="result-value">${(weight * 0.05).toFixed(2)} mL</span></div><div class="flex justify-between"><span>덱사메타손:</span><span class="result-value">${(weight * 0.1).toFixed(2)} mL</span></div></div>`; break;
-            case 'cephron7_dexa': antibioticResultHTML = `<div class="text-sm space-y-1"><div class="flex justify-between"><span>세프론세븐:</span><span class="result-value">${(weight * 0.05).toFixed(2)} mL</span></div><div class="flex justify-between"><span>덱사메타손:</span><span class="result-value">${(weight * 0.1).toFixed(2)} mL</span></div></div>`; break; // 수정됨
+            case 'cephron7_dexa': antibioticResultHTML = `<div class="text-sm space-y-1"><div class="flex justify-between"><span>세프론세븐:</span><span class="result-value">${(weight * 0.05).toFixed(2)} mL</span></div><div class="flex justify-between"><span>덱사메타손:</span><span class="result-value">${(weight * 0.1).toFixed(2)} mL</span></div></div>`; break;
         }
     }
     const antibioticDivHTML = `<div class="p-3 bg-teal-50 rounded-lg"><h4 class="font-bold text-teal-800 mb-2">예방적 항생제</h4><select id="antibiotic_selection" class="large-interactive-field !text-sm !p-2 w-full" onchange="calculateAll()"><option value="baytril50">바이트릴 50주</option><option value="cephron7">세프론세븐</option><option value="baytril25">바이트릴 25주</option><option value="baytril50_dexa">바이트릴50주 & 스테로이드</option><option value="cephron7_dexa">세프론세븐 & 스테로이드</option></select><div class="mt-2 p-2 bg-white rounded min-h-[40px] flex items-center justify-center">${antibioticResultHTML}</div></div>`;
@@ -209,11 +209,28 @@ function calculateDischargeMeds() {
             if (!summaryData[days]) { summaryData[days] = []; }
             
             let summaryText = `${drugName.split(' (')[0]} ${totalAmountText}`;
-            if (dailyMultiplier === 1) { summaryText += ' (1일 1회)'; }
+            if (dailyMultiplier === 1) {
+                if (row.dataset.special === 'same') {
+                    const dailyDoseFractionValue = Math.ceil(weight / 2.5) * 0.25;
+                    let dailyDoseFractionText = '';
+                    if (dailyDoseFractionValue === 0.25) dailyDoseFractionText = '1/4정';
+                    else if (dailyDoseFractionValue === 0.5) dailyDoseFractionText = '1/2정';
+                    else if (dailyDoseFractionValue === 0.75) dailyDoseFractionText = '3/4정';
+                    else dailyDoseFractionText = `${dailyDoseFractionValue}정`;
+                    summaryText += ` (1일 ${dailyDoseFractionText}씩)`;
+                } else {
+                    summaryText += ' (1일 1회)';
+                }
+            }
             
+            const isGabapentin = row.dataset.drug === 'gabapentin';
+            const isLiverDanger = row.querySelector('.notes').dataset.liver === 'true' && isLiverIssue;
+            const isKidneyDanger = row.querySelector('.notes').dataset.kidney === 'true' && isKidneyIssue;
+
             summaryData[days].push({
                 text: summaryText,
-                isDanger: (row.querySelector('.notes').dataset.liver === 'true' && isLiverIssue) || (row.querySelector('.notes').dataset.kidney === 'true' && isKidneyIssue)
+                isDanger: (isLiverDanger || isKidneyDanger) && !isGabapentin,
+                isWarning: (isLiverDanger || isKidneyDanger) && isGabapentin
             });
         }
     });
@@ -240,9 +257,11 @@ function updateDischargeSummaryUI(summaryData) {
         list.className = 'space-y-1';
         summaryData[day].forEach(item => {
             const li = document.createElement('li');
-            li.className = 'text-gray-700';
+            li.className = 'summary-item'; // Use a base class
             if (item.isDanger) {
-                li.innerHTML = `<span class="danger font-bold text-red-600">${item.text}</span>`;
+                li.innerHTML = `<span class="danger">${item.text}</span>`;
+            } else if (item.isWarning) {
+                li.innerHTML = `<span class="warning">${item.text}</span>`;
             } else {
                 li.textContent = item.text;
             }
@@ -328,7 +347,7 @@ function calculateWeightSize() {
         resultContainerWeight.classList.add('hidden');
         return;
     }
-    let recommendedSize = '9.0 이상'; // Default for over 40kg
+    let recommendedSize = '9.0 이상';
     for (let i = 0; i < weightSizeGuide.length; i++) {
         if (weight <= weightSizeGuide[i].weight) {
             recommendedSize = weightSizeGuide[i].size;
@@ -482,7 +501,6 @@ function populateProtocolTab() {
 function populateEducationTab() {
     const container = document.getElementById('captureArea');
     container.innerHTML = `<header class="text-center mb-10"><h1 class="text-3xl md:text-4xl font-bold text-blue-800">금호동물병원</h1><h2 class="text-xl md:text-2xl font-semibold text-gray-700 mt-3">우리 아이를 위한 통증 관리 패치 안내문</h2></header><div class="border-y border-gray-200 py-5 mb-10 space-y-4"><div class="flex items-center"><label for="patientName_handout" class="font-semibold text-gray-600 mr-3 w-24 text-right">환자 이름:</label><input type="text" id="patientName_handout" placeholder="아이 이름 입력" class="flex-grow p-2 border border-gray-300 rounded-md"></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="flex items-center"><label for="attachDate" class="font-semibold text-gray-600 mr-3 w-24 text-right">부착 날짜:</label><input type="date" id="attachDate" onchange="calculateRemovalDate()" class="flex-grow p-2 border border-gray-300 rounded-md cursor-pointer"></div><div class="flex items-center"><label for="attachTime" class="font-semibold text-gray-600 mr-3 w-24 text-right">부착 시간:</label><input type="time" id="attachTime" onchange="calculateRemovalDate()" class="flex-grow p-2 border border-gray-300 rounded-md cursor-pointer"></div></div><div id="removalInfo" class="mt-4 p-4 bg-yellow-100 border-2 border-yellow-400 rounded-lg text-center transition-all duration-300"><p class="font-bold text-yellow-900">날짜와 시간을 입력하면 제거일이 계산됩니다.</p></div></div><p class="text-gray-700 text-base md:text-lg mb-10 text-center leading-relaxed">사랑하는 보호자님, 저희 병원을 믿고 소중한 아이를 맡겨주셔서 감사합니다.<br>우리 아이가 수술 후 통증 없이 편안하게 회복할 수 있도록, <strong>'부프레노르핀'이라는 성분의 진통 패치</strong>를 부착했습니다.<br>아래 내용을 잘 읽어보시고, 아이가 잘 회복할 수 있도록 함께 보살펴 주세요.</p><div class="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-md mb-10"><h3 class="text-xl font-bold text-blue-900 mb-2">✅ 이 패치는 어떤 역할을 하나요?</h3><ul class="list-disc list-inside text-gray-700 space-y-1 text-base pl-4"><li>약 3~4일 동안 진통제가 서서히 방출되어, 아이가 통증 없이 편안하게 지낼 수 있도록 돕는 <strong>'지속형 진통 패치'</strong>입니다.</li><li>잦은 주사나 약 복용의 스트레스를 줄여주는 장점이 있습니다.</li></ul></div><div class="mb-10"><h3 class="text-2xl font-bold text-gray-800 text-center mb-4">👀 우리 아이, 이렇게 관찰해주세요!</h3><p class="text-center text-gray-500 mb-6">아이의 행동 변화는 약효가 잘 나타나고 있다는 긍정적인 신호일 수 있습니다. 너무 걱정하지 마세요!</p><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="bg-green-50 rounded-lg p-5 border border-green-200"><h4 class="text-xl font-bold text-green-800 flex items-center mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>이런 모습은 괜찮아요</h4><ul class="list-disc list-inside space-y-3 text-gray-700 pl-4"><li><strong>잠이 늘거나 얌전해져요.</strong><br><span class="text-sm text-gray-500">몸이 편안하고 통증이 줄었다는 신호일 수 있습니다.</span></li><li><strong>평소보다 말이 많아지거나, 몸을 많이 비벼요.</strong><br><span class="text-sm text-gray-500">일부 고양이의 정상적인 약물 반응으로 보통 1~2일 내 사라져요.</span></li><li><strong>눈동자가 평소보다 커져 보여요.</strong><br><span class="text-sm text-gray-500">진통제의 일반적인 효과 중 하나입니다.</span></li><li><strong>식욕이 약간 줄어들어요.</strong><br><span class="text-sm text-gray-500">일시적일 수 있으니, 물을 잘 마시는지 확인해주세요.</span></li></ul></div><div class="bg-red-50 rounded-lg p-5 border border-red-200"><h4 class="text-xl font-bold text-red-800 flex items-center mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>이런 모습은 바로 연락주세요</h4><ul class="list-disc list-inside space-y-3 text-gray-700 pl-4"><li><strong>숨을 헐떡이거나 힘겹게 쉬어요.</strong><br><span class="text-sm text-gray-500">호흡이 분당 40회 이상으로 지속될 때</span></li><li><strong>몸을 전혀 움직이지 못하고 축 늘어져요.</strong><br><span class="text-sm text-gray-500">이름을 불러도 반응이 거의 없을 때</span></li><li><strong>구토나 설사를 3회 이상 반복해요.</strong><br><span class="text-sm text-gray-500">탈수나 다른 문제의 신호일 수 있습니다.</span></li><li><strong>패치가 떨어졌거나, 아이가 핥거나 씹고 있어요.</strong><br><span class="text-sm text-gray-500">과용량 위험이 있으니 즉시 연락주세요.</span></li></ul></div></div></div><div class="bg-yellow-50 border-l-4 border-yellow-500 p-5 rounded-md mb-10"><h3 class="text-xl font-bold text-yellow-900 mb-3">🔥 보호자님, 이것만은 꼭! 지켜주세요</h3><ol class="list-decimal list-inside text-gray-700 space-y-3 pl-4"><li><strong>가장 중요! 열 주의 🔥</strong><br><strong>전기장판, 핫팩, 온열 램프, 드라이기 등</strong> 패치 부위에 열이 가해지지 않도록 <strong>절대적으로</strong> 주의해주세요. 약물이 과다 흡수되어 위험할 수 있습니다.</li><li><strong>패치 보호</strong><br>아이가 패치를 핥거나, 긁거나, 떼어내지 않도록 지켜봐 주세요. 필요 시 넥카라나 환자복을 착용시켜 주세요.</li><li><strong>안전한 환경</strong><br>다른 반려동물이나 어린이가 패치를 만지거나 핥지 않도록 주의해주세요.</li><li><strong>안전한 폐기</strong><br>패치를 제거할 때는 접착면끼리 마주 보게 반으로 접어, 아이의 손이 닿지 않는 곳에 안전하게 버려주세요.</li></ol></div><footer class="border-t border-gray-200 pt-8 text-center"><h3 class="text-xl font-semibold text-gray-800">궁금하거나 걱정되는 점이 있다면?</h3><p class="text-gray-600 mt-2">사소한 걱정이라도 괜찮으니, 주저 말고 아래 연락처로 문의해 주세요.</p><div class="mt-4 bg-gray-50 rounded-lg p-4 inline-block"><p class="font-bold text-lg text-blue-800">금호동물병원</p><p class="text-gray-700 mt-1">📞 <a href="tel:062-383-7572" class="hover:underline">062-383-7572</a></p><div class="text-sm text-gray-500 mt-2"><p>평일: 오전 9시 30분 ~ 오후 6시</p><p>토요일: 오전 9시 30분 ~ 오후 3시</p><p>일요일: 휴무</p></div><a href="https://pf.kakao.com/_jiICK/chat" target="_blank" class="mt-4 inline-block w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.582 0 0 3.582 0 7.994c0 2.446 1.065 4.635 2.803 6.147L.775 16l2.16-2.053a7.95 7.95 0 0 0 5.059 1.85c4.412 0 7.994-3.582 7.994-7.994a7.85 7.85 0 0 0-2.387-5.614z"/></svg>카카오톡 문의</a></div><p class="text-xs text-gray-400 mt-8">저희는 항상 아이가 편안하게 회복할 수 있도록 곁에서 최선을 다하겠습니다.</p></footer>`;
-    // Add event listener to the new handout name input for sync
     document.getElementById('patientName_handout').addEventListener('input', () => {
         document.getElementById('patient_name_main').value = document.getElementById('patientName_handout').value;
     });
@@ -518,4 +536,4 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('calculate-trachea-btn').addEventListener('click', calculateTracheaSize);
     document.getElementById('trachea-input').addEventListener('keydown', (event) => { if (event.key === 'Enter') calculateTracheaSize(); });
     document.getElementById('saveEtTubeSelection').addEventListener('click', saveAndDisplayTubeSelection);
-});```
+});
