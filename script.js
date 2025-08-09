@@ -85,8 +85,63 @@ function updatePatchRecommendation(weight) {
 }
 
 function populatePrepTab(weight) {
+    // Get current antibiotic selection before the DOM is rebuilt
+    const antibioticSelection = document.getElementById('antibiotic_selection')?.value || 'baytril50';
+
     const isCardiac = document.getElementById('status_cardiac').checked;
-    const clavaIvMl = (20 * weight) / concentrations.clavamox_iv;
+
+    // --- NEW ANTIBIOTIC CALCULATION ---
+    let antibioticResultHTML = '';
+    switch (antibioticSelection) {
+        case 'baytril50':
+            const baytril50_ml = weight * 0.05;
+            antibioticResultHTML = `<p class="text-center"><span class="result-value">${baytril50_ml.toFixed(2)} mL</span></p>`;
+            break;
+        case 'cephron7':
+            const cephron7_ml = weight * 0.5;
+            antibioticResultHTML = `<p class="text-center"><span class="result-value">${cephron7_ml.toFixed(2)} mL</span></p>`;
+            break;
+        case 'baytril25':
+            const baytril25_ml = weight * 0.1;
+            antibioticResultHTML = `<p class="text-center"><span class="result-value">${baytril25_ml.toFixed(2)} mL</span></p>`;
+            break;
+        case 'baytril50_dexa':
+            const baytril50_dexa_ml = weight * 0.05;
+            const dexa_ml_1 = weight * 0.1;
+            antibioticResultHTML = `
+                <div class="text-sm space-y-1">
+                  <div class="flex justify-between"><span>바이트릴 50주:</span><span class="result-value">${baytril50_dexa_ml.toFixed(2)} mL</span></div>
+                  <div class="flex justify-between"><span>덱사메타손:</span><span class="result-value">${dexa_ml_1.toFixed(2)} mL</span></div>
+                </div>`;
+            break;
+        case 'cephron7_dexa':
+            const cephron7_dexa_ml = weight * 0.5;
+            const dexa_ml_2 = weight * 0.1;
+            antibioticResultHTML = `
+                <div class="text-sm space-y-1">
+                  <div class="flex justify-between"><span>세프론세븐:</span><span class="result-value">${cephron7_dexa_ml.toFixed(2)} mL</span></div>
+                  <div class="flex justify-between"><span>덱사메타손:</span><span class="result-value">${dexa_ml_2.toFixed(2)} mL</span></div>
+                </div>`;
+            break;
+    }
+
+    const antibioticDivHTML = `
+        <div class="p-3 bg-teal-50 rounded-lg">
+            <h4 class="font-bold text-teal-800 mb-2">예방적 항생제</h4>
+            <select id="antibiotic_selection" class="large-interactive-field !text-sm !p-2 w-full" onchange="calculateAll()">
+                <option value="baytril50">바이트릴 50주</option>
+                <option value="cephron7">세프론세븐</option>
+                <option value="baytril25">바이트릴 25주</option>
+                <option value="baytril50_dexa">바이트릴50주 & 스테로이드</option>
+                <option value="cephron7_dexa">세프론세븐 & 스테로이드</option>
+            </select>
+            <div class="mt-2 p-2 bg-white rounded min-h-[40px] flex items-center justify-center">
+                ${antibioticResultHTML}
+            </div>
+        </div>
+    `;
+
+    // Other calculations remain the same
     const butorMl = (0.2 * weight) / concentrations.butorphanol;
     const midaMl = (0.2 * weight) / concentrations.midazolam;
     const lidoLoadMl = (1 * weight) / concentrations.lidocaine;
@@ -119,17 +174,22 @@ function populatePrepTab(weight) {
         </div>`;
 
     document.getElementById('pre_op_drugs_result').innerHTML = `
-        <div class="p-3 bg-teal-50 rounded-lg"><h4 class="font-bold text-teal-800">예방적 항생제</h4><p><span class="result-value">${clavaIvMl.toFixed(2)} mL</span> (클라바목스)</p></div>
+        ${antibioticDivHTML}
         <div class="p-3 bg-blue-50 rounded-lg"><h4 class="font-bold text-blue-800">마취 전 투약</h4><p><span class="result-value">${butorMl.toFixed(2)} mL</span> 부토르파놀</p><p><span class="result-value">${midaMl.toFixed(2)} mL</span> 미다졸람</p></div>
         <div class="p-3 bg-amber-50 rounded-lg"><h4 class="font-bold text-amber-800">LK 부하 용량</h4><p><span class="result-value">${lidoLoadMl.toFixed(2)} mL</span> 리도카인</p><p><span class="result-value">${ketaLoadMl_diluted.toFixed(2)} mL</span> 케타민(희석)</p><p class="text-xs text-gray-600 font-semibold mt-1">※ 희석: 케타민(50주) 0.2mL + N/S 0.8mL</p></div>
         <div class="p-3 bg-indigo-50 rounded-lg col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2"><h4 class="font-bold text-indigo-800">도입 마취</h4><div class="grid grid-cols-2 gap-2 mt-2">${alfaxanCard}${propofolCard}</div></div>
-        <div class="p-3 bg-cyan-50 rounded-lg"><h4 class="font-bold text-cyan-800">수액 펌프</h4><p><span class="result-value">${fluidCorrected.toFixed(1)} mL/hr</span></p><p class="text-xs text-gray-500 mt-1">(목표: ${fluidTarget.toFixed(1)}mL/hr)</p></div>`;
+        <div class="p-3 bg-cyan-50 rounded-lg"><h4 class="font-bold text-cyan-800">수액 펌프</h4><p><span class="result-value">${fluidCorrected.toFixed(1)} mL/hr</span></p><p class="text-xs text-gray-500 mt-1">(목표: ${fluidTarget.toFixed(1)}mL/hr)</p></div>
+    `;
     
+    // Re-apply the selection after rebuilding the DOM
+    document.getElementById('antibiotic_selection').value = antibioticSelection;
+
     const alfaxanElement = document.getElementById('alfaxan_card');
     if (alfaxanElement) {
         alfaxanElement.classList.toggle('highlight-recommendation', isCardiac);
     }
-
+    
+    // The rest of the function remains the same
     const sites = parseInt(document.getElementById('dog_block_sites')?.value) || 4;
     document.getElementById('dog_nerve_block_result').innerHTML = `<div class="space-y-2"><label for="dog_block_sites" class="font-semibold text-gray-700">마취 부위 수:</label><select id="dog_block_sites" class="large-interactive-field" onchange="calculateAll()"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option></select></div><div class="p-3 border rounded-lg bg-gray-50 mt-4 text-center"><h4 class="font-semibold text-gray-800">총 준비 용량 (${sites}군데)</h4><p class="text-lg"><span class="result-value">${((0.1 * weight * sites)*0.8).toFixed(2)}mL</span> (부피) + <span class="result-value">${((0.1 * weight * sites)*0.2).toFixed(2)}mL</span> (리도)</p><p class="text-xs text-gray-500 mt-1">부위당 약 ${((0.1 * weight * sites) / sites).toFixed(2)} mL 주입</p></div>`;
     document.getElementById('dog_block_sites').value = sites;
@@ -137,7 +197,9 @@ function populatePrepTab(weight) {
     const pumpRate = (lidoRateMcg * weight * 60) / 2000;
     document.getElementById('lk_cri_calc_result').innerHTML = `<div class="p-4 border rounded-lg bg-gray-50 space-y-2"><h4 class="font-semibold text-gray-800">CRI 펌프 속도 설정</h4><p class="text-xs text-gray-600">희석: 리도카인 3mL + 케타민(50주) 0.24mL + N/S 26.76mL</p><div><label class="text-sm font-semibold">목표 (mcg/kg/min):</label><select id="lk_cri_rate_mcg" class="large-interactive-field" onchange="calculateAll()"><option value="25">25</option><option value="30">30</option><option value="50">50</option></select></div><div class="mt-2 text-center text-red-600 font-bold text-2xl">${pumpRate.toFixed(2)} mL/hr</div></div>`;
     document.getElementById('lk_cri_rate_mcg').value = lidoRateMcg;
-    document.getElementById('workflow_steps').innerHTML = `<div class="step-card p-4"><h3 class="font-bold text-lg text-blue-800">Step 1: 내원 및 준비</h3><p class="text-sm text-gray-700">보호자 동의서 작성. 환자는 즉시 IV 카테터 장착 후, 준비된 클라바목스 IV를 투여하고 수액 처치를 시작합니다.</p></div><div class="step-card p-4"><h3 class="font-bold text-lg text-blue-800">Step 2: 수액처치 & 산소 공급 (최소 10분)</h3><p class="text-sm text-gray-700">'약물 준비' 섹션에 계산된 수액 펌프 속도로 수액을 맞추고, 수술 준비 동안 입원장 안에서 산소를 공급합니다.</p></div><div class="step-card p-4"><h3 class="font-bold text-lg text-blue-800">Step 3: 마취 전 투약 및 산소 공급 (3분)</h3><p class="text-sm text-gray-700">마스크로 100% 산소를 공급하면서, 준비된 부토르파놀 + 미다졸람을 3분에 걸쳐 천천히 IV로 주사합니다.</p></div><div class="warning-card p-4"><h3 class="font-bold text-lg text-amber-800">Step 4: LK-CRI 부하 용량 (Loading Dose)</h3><p class="text-sm text-gray-700">마취 유도 직전, 준비된 리도카인과 케타민을 2분에 걸쳐 매우 천천히 IV로 주사합니다. 이는 통증 증폭을 막는 핵심 단계입니다.</p></div><div class="step-card p-4"><h3 class="font-bold text-lg text-blue-800">Step 5: 마취 유도 (Induction)</h3><p class="text-sm text-gray-700">준비된 알팍산 또는 다른 유도제를 효과를 봐가며 천천히 주사하여 기관 삽관합니다.</p></div><div class="step-card p-4"><h3 class="font-bold text-lg text-blue-800">Step 6: 마취 유지 (Maintenance)</h3><p class="text-sm text-gray-700">삽관 후 즉시 이소플루란 마취를 시작하고, 동시에 LK-CRI 펌프를 작동시키며 수액 펌프 속도를 '마취 중' 권장 설정값으로 변경합니다.</p></div>`;
+    
+    let workflowHTML = `<div class="step-card p-4"><h3 class="font-bold text-lg text-blue-800">Step 1: 내원 및 준비</h3><p class="text-sm text-gray-700">보호자 동의서 작성. 환자는 즉시 IV 카테터 장착 후, 준비된 예방적 항생제를 투여하고 수액 처치를 시작합니다.</p></div><div class="step-card p-4"><h3 class="font-bold text-lg text-blue-800">Step 2: 수액처치 & 산소 공급 (최소 10분)</h3><p class="text-sm text-gray-700">'약물 준비' 섹션에 계산된 수액 펌프 속도로 수액을 맞추고, 수술 준비 동안 입원장 안에서 산소를 공급합니다.</p></div><div class="step-card p-4"><h3 class="font-bold text-lg text-blue-800">Step 3: 마취 전 투약 및 산소 공급 (3분)</h3><p class="text-sm text-gray-700">마스크로 100% 산소를 공급하면서, 준비된 부토르파놀 + 미다졸람을 3분에 걸쳐 천천히 IV로 주사합니다.</p></div><div class="warning-card p-4"><h3 class="font-bold text-lg text-amber-800">Step 4: LK-CRI 부하 용량 (Loading Dose)</h3><p class="text-sm text-gray-700">마취 유도 직전, 준비된 리도카인과 케타민을 2분에 걸쳐 매우 천천히 IV로 주사합니다. 이는 통증 증폭을 막는 핵심 단계입니다.</p></div><div class="step-card p-4"><h3 class="font-bold text-lg text-blue-800">Step 5: 마취 유도 (Induction)</h3><p class="text-sm text-gray-700">준비된 알팍산 또는 다른 유도제를 효과를 봐가며 천천히 주사하여 기관 삽관합니다.</p></div><div class="step-card p-4"><h3 class="font-bold text-lg text-blue-800">Step 6: 마취 유지 (Maintenance)</h3><p class="text-sm text-gray-700">삽관 후 즉시 이소플루란 마취를 시작하고, 동시에 LK-CRI 펌프를 작동시키며 수액 펌프 속도를 '마취 중' 권장 설정값으로 변경합니다.</p></div>`
+    document.getElementById('workflow_steps').innerHTML = workflowHTML;
 }
 
 function populateEmergencyTab(weight) {
@@ -393,7 +455,7 @@ function updateTubeDisplay() {
 }
 
 // --- 데이터 저장/불러오기/이미지 저장 기능 ---
-const a_input_ids = ['patient_name_main', 'surgery_date', 'weight', 'dog_block_sites', 'lk_cri_rate_mcg', 'dobutamine_dose_select', 'selectedEtTubeSize', 'selectedEtTubeNotes', 'patientName', 'attachDate', 'attachTime'];
+const a_input_ids = ['patient_name_main', 'surgery_date', 'weight', 'dog_block_sites', 'lk_cri_rate_mcg', 'dobutamine_dose_select', 'selectedEtTubeSize', 'selectedEtTubeNotes', 'patientName', 'attachDate', 'attachTime', 'antibiotic_selection'];
 const a_checkbox_ids = ['status_healthy', 'status_cardiac', 'status_liver', 'status_renal', 'selectedEtTubeCuff'];
 
 function saveRecords() {
