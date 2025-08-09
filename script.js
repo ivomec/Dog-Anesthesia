@@ -94,6 +94,8 @@ function populatePrepTab(weight) {
 
     const alfaxanMlMin = (1 * weight) / concentrations.alfaxalone;
     const alfaxanMlMax = (2 * weight) / concentrations.alfaxalone;
+    const propofolMlMin = (2 * weight) / concentrations.propofol;
+    const propofolMlMax = (6 * weight) / concentrations.propofol;
     
     let fluidRate = 5;
     if (isCardiac) fluidRate = 2;
@@ -112,8 +114,8 @@ function populatePrepTab(weight) {
     const propofolCard = `
         <div class="p-2 bg-purple-50 rounded-lg">
             <h5 class="font-semibold text-purple-800">프로포폴</h5>
-            <p><span class="result-value">2 ~ 6</span> mg/kg</p>
-            <p class="text-xs text-gray-500 mt-1">(효과 보며 분할 주입)</p>
+            <p><span class="result-value">${propofolMlMin.toFixed(2)}~${propofolMlMax.toFixed(2)} mL</span></p>
+            <p class="text-xs text-gray-500 mt-1">(2-6 mg/kg, 효과보며 분할 주입)</p>
         </div>`;
 
     document.getElementById('pre_op_drugs_result').innerHTML = `
@@ -513,4 +515,4 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('calculate-trachea-btn').addEventListener('click', calculateTracheaSize);
     document.getElementById('trachea-input').addEventListener('keydown', (event) => { if (event.key === 'Enter') calculateTracheaSize(); });
     document.getElementById('saveEtTubeSelection').addEventListener('click', saveAndDisplayTubeSelection);
-});
+});```
