@@ -176,6 +176,7 @@ function calculateDischargeMeds() {
             }
 
             const drugName = row.querySelector('td:nth-child(2)').textContent;
+            const drugKey = row.dataset.drug;
             const days = parseInt(row.querySelector('.days').value);
             const unit = row.dataset.unit;
             let totalAmount = 0;
@@ -199,7 +200,7 @@ function calculateDischargeMeds() {
                  totalAmount = weight * 0.75 * dailyMultiplier * days;
                  totalAmountText = `${totalAmount.toFixed(1)} ${unit}`;
             } else {
-                if (['udca', 'silymarin', 'itraconazole'].includes(row.dataset.drug)) { dailyMultiplier = 2; }
+                if (['udca', 'silymarin', 'itraconazole'].includes(drugKey)) { dailyMultiplier = 2; }
                 totalAmount = (weight * parseFloat(row.querySelector('.dose').value) * dailyMultiplier * days) / parseFloat(row.dataset.strength);
                 totalAmountText = `${totalAmount.toFixed(1)} ${unit}`;
             }
@@ -213,17 +214,17 @@ function calculateDischargeMeds() {
                 if (row.dataset.special === 'same') {
                     const dailyDoseFractionValue = Math.ceil(weight / 2.5) * 0.25;
                     let dailyDoseFractionText = '';
-                    if (dailyDoseFractionValue === 0.25) dailyDoseFractionText = '1/4정';
-                    else if (dailyDoseFractionValue === 0.5) dailyDoseFractionText = '1/2정';
-                    else if (dailyDoseFractionValue === 0.75) dailyDoseFractionText = '3/4정';
-                    else dailyDoseFractionText = `${dailyDoseFractionValue}정`;
+                    if (dailyDoseFractionValue <= 0.25) dailyDoseFractionText = '1/4정';
+                    else if (dailyDoseFractionValue <= 0.5) dailyDoseFractionText = '1/2정';
+                    else if (dailyDoseFractionValue <= 0.75) dailyDoseFractionText = '3/4정';
+                    else dailyDoseFractionText = `${dailyDoseFractionValue.toFixed(2).replace('.00','')}정`;
                     summaryText += ` (1일 ${dailyDoseFractionText}씩)`;
                 } else {
                     summaryText += ' (1일 1회)';
                 }
             }
             
-            const isGabapentin = row.dataset.drug === 'gabapentin';
+            const isGabapentin = drugKey === 'gabapentin';
             const isLiverDanger = row.querySelector('.notes').dataset.liver === 'true' && isLiverIssue;
             const isKidneyDanger = row.querySelector('.notes').dataset.kidney === 'true' && isKidneyIssue;
 
@@ -257,7 +258,7 @@ function updateDischargeSummaryUI(summaryData) {
         list.className = 'space-y-1';
         summaryData[day].forEach(item => {
             const li = document.createElement('li');
-            li.className = 'summary-item'; // Use a base class
+            li.className = 'summary-item';
             if (item.isDanger) {
                 li.innerHTML = `<span class="danger">${item.text}</span>`;
             } else if (item.isWarning) {
@@ -332,10 +333,9 @@ function exportPrepSheetAsImage() {
 
 // --- ET Tube 계산기 및 기록 관련 함수 (수정됨) ---
 const weightSizeGuide = [
-    { weight: 1, size: '2.0' }, { weight: 2, size: '2.5' }, { weight: 3.5, size: '3.0' },
-    { weight: 4, size: '3.5' }, { weight: 5, size: '4.0' }, { weight: 6, size: '4.5' },
-    { weight: 7, size: '5.5' }, { weight: 8, size: '6.0' }, { weight: 9, size: '6.5' },
-    { weight: 12, size: '7.0' }, { weight: 14, size: '7.5' }, { weight: 40, size: '9.0' }
+    { weight: 1, size: '2.0' }, { weight: 2, size: '2.5' }, { weight: 3.5, size: '3.0' }, { weight: 4, size: '3.5' },
+    { weight: 5, size: '4.0' }, { weight: 6, size: '4.5' }, { weight: 7, size: '5.5' }, { weight: 8, size: '6.0' },
+    { weight: 9, size: '6.5' }, { weight: 12, size: '7.0' }, { weight: 14, size: '7.5' }, { weight: 40, size: '9.0' }
 ];
 
 function calculateWeightSize() {
@@ -444,7 +444,7 @@ function saveRecords() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     const patientName = document.getElementById('patient_name_main').value || '환자';
-    const surgeryDate = document.getElementById('surgery_date').value || new Date().toISOString().split('T')[0];
+    const surgeryDate = document.getElementById('surgery_date').value || new Date().toISOString().split('T');
     a.download = `마취기록_${patientName}_${surgeryDate}.json`;
     a.href = url;
     a.click();
@@ -452,7 +452,7 @@ function saveRecords() {
 }
 
 function loadRecords(event) {
-    const file = event.target.files[0];
+    const file = event.target.files;
     if (!file) return;
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -482,7 +482,7 @@ function loadRecords(event) {
 function saveDashboardAsImage() {
     const captureElement = document.getElementById('dashboard-capture-area');
     const patientName = document.getElementById('patient_name_main').value || '환자';
-    const surgeryDate = document.getElementById('surgery_date').value || new Date().toISOString().split('T')[0];
+    const surgeryDate = document.getElementById('surgery_date').value || new Date().toISOString().split('T');
     const filename = `마취대시보드_${patientName}_${surgeryDate}.png`;
     html2canvas(captureElement, { useCORS: true, scale: 1.5, backgroundColor: '#f0f4f8' }).then(canvas => {
         const link = document.createElement('a');
@@ -529,11 +529,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Event Listeners
-    document.getElementById('save-record-btn').addEventListener('click', saveRecords);
-    document.getElementById('load-record-input').addEventListener('change', loadRecords);
-    document.getElementById('save-image-btn').addEventListener('click', saveDashboardAsImage);
-    document.getElementById('calculate-weight-btn').addEventListener('click', calculateWeightSize);
-    document.getElementById('calculate-trachea-btn').addEventListener('click', calculateTracheaSize);
-    document.getElementById('trachea-input').addEventListener('keydown', (event) => { if (event.key === 'Enter') calculateTracheaSize(); });
-    document.getElementById('saveEtTubeSelection').addEventListener('click', saveAndDisplayTubeSelection);
-});```
+    document
