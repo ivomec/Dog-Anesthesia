@@ -102,7 +102,7 @@ function populatePrepTab(weight) {
     const alfaxanCard = `<div id="alfaxan_card" class="p-2 bg-indigo-50 rounded-lg transition-all duration-300"><h5 class="font-semibold text-indigo-800">알팍산</h5><p><span class="result-value">${alfaxanMlMin.toFixed(2)}~${alfaxanMlMax.toFixed(2)} mL</span></p>${isCardiac ? '<p class="text-xs font-bold text-green-600 mt-1">❤️ 심장질환 추천</p>' : ''}</div>`;
     const propofolCard = `<div class="p-2 bg-purple-50 rounded-lg"><h5 class="font-semibold text-purple-800">프로포폴</h5><p><span class="result-value">${propofolMlMin.toFixed(2)}~${propofolMlMax.toFixed(2)} mL</span></p><p class="text-xs text-gray-500 mt-1">(2-6 mg/kg)</p></div>`;
 
-    // --- 수액 속도 계산 로직 시작 ---
+    // --- 수액 속도 계산 로직 시작 (보정값 적용) ---
     let fluidCardHTML;
     if (weight > 0) {
         let rates;
@@ -125,7 +125,7 @@ function populatePrepTab(weight) {
                 post: { low: 3.0, high: 4.0 }
             };
         } else {
-            patientStatusText = "정상";
+            patientStatusText = "정상 환자";
             rates = {
                 pre: { low: 2.0, high: 4.0 },
                 intra: { text: "5.0" },
@@ -133,39 +133,51 @@ function populatePrepTab(weight) {
             };
         }
 
-        const calcRate = (rate) => {
-            if (rate.low) return `${(rate.low * weight).toFixed(1)}~${(rate.high * weight).toFixed(1)} mL/hr`;
-            if (rate.text === "5.0") return `${(5.0 * weight).toFixed(1)} mL/hr (시작점)`;
-            return rate.text;
+        const getRatesHTML = (label, rate) => {
+            const correctionFactor = 0.7;
+            let targetText, pumpSetText;
+
+            if (rate.low && rate.high) {
+                const targetLow = rate.low * weight;
+                const targetHigh = rate.high * weight;
+                targetText = `${targetLow.toFixed(1)}~${targetHigh.toFixed(1)} mL/hr`;
+
+                const pumpLow = targetLow / correctionFactor;
+                const pumpHigh = targetHigh / correctionFactor;
+                pumpSetText = `${pumpLow.toFixed(1)}~${pumpHigh.toFixed(1)} mL/hr`;
+            } else if (rate.text === "5.0") {
+                const target = parseFloat(rate.text) * weight;
+                targetText = `${target.toFixed(1)} mL/hr`;
+                const pumpSet = target / correctionFactor;
+                pumpSetText = `${pumpSet.toFixed(1)} mL/hr (시작점)`;
+            } else { // Handles text like "즉시 중단" or "< 2.0 또는 중단"
+                targetText = rate.text;
+                pumpSetText = rate.text; // No correction for text-based instructions
+            }
+
+            return `
+                <div class="flex flex-col p-2 bg-white rounded-md border">
+                    <span class="font-semibold text-gray-700 text-sm">${label}</span>
+                    <span class="result-value text-xl font-extrabold text-cyan-700">${pumpSetText}</span>
+                    <span class="text-xs text-gray-500 text-right">(목표: ${targetText})</span>
+                </div>
+            `;
         };
-        
-        const preAnesMlHr = calcRate(rates.pre);
-        const intraAnesMlHr = calcRate(rates.intra);
-        const postAnesMlHr = calcRate(rates.post);
         
         fluidCardHTML = `
         <div class="p-3 bg-cyan-50 rounded-lg">
-            <h4 class="font-bold text-cyan-800 mb-2">수액 속도 가이드</h4>
-            <div class="space-y-1 text-sm">
-                <div class="flex justify-between items-center p-1 bg-white rounded">
-                    <span class="font-semibold text-gray-600">마취 전:</span>
-                    <span class="result-value text-base font-bold">${preAnesMlHr}</span>
-                </div>
-                <div class="flex justify-between items-center p-1 bg-white rounded">
-                    <span class="font-semibold text-gray-600">마취 중:</span>
-                    <span class="result-value text-base font-bold">${intraAnesMlHr}</span>
-                </div>
-                <div class="flex justify-between items-center p-1 bg-white rounded">
-                    <span class="font-semibold text-gray-600">마취 후:</span>
-                    <span class="result-value text-base font-bold">${postAnesMlHr}</span>
-                </div>
+            <h4 class="font-bold text-cyan-800 mb-2">수액 펌프 설정 (보정값)</h4>
+            <div class="space-y-2">
+                ${getRatesHTML('마취 전', rates.pre)}
+                ${getRatesHTML('마취 중', rates.intra)}
+                ${getRatesHTML('마취 후', rates.post)}
             </div>
-            <p class="text-xs text-cyan-900 mt-2 text-center font-semibold">(${patientStatusText} 환자 기준)</p>
+            <p class="text-xs text-cyan-900 mt-2 text-center font-semibold">(${patientStatusText} / 보정계수 0.7 적용)</p>
         </div>`;
     } else {
         fluidCardHTML = `
         <div class="p-3 bg-cyan-50 rounded-lg">
-            <h4 class="font-bold text-cyan-800 mb-2">수액 속도 가이드</h4>
+            <h4 class="font-bold text-cyan-800 mb-2">수액 펌프 설정</h4>
             <p class="text-gray-600 text-center p-4">체중을 입력해주세요.</p>
         </div>`;
     }
@@ -603,4 +615,4 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('calculate-trachea-btn').addEventListener('click', calculateTracheaSize);
     document.getElementById('trachea-input').addEventListener('keydown', (event) => { if (event.key === 'Enter') calculateTracheaSize(); });
     document.getElementById('saveEtTubeSelection').addEventListener('click', saveAndDisplayTubeSelection);
-});
+});```
