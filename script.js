@@ -1,19 +1,6 @@
 // --- 전역 변수 및 상수 ---
-const concentrations = { lidocaine: 20, ketamine: 50, ketamine_diluted: 10, bupivacaine: 5, butorphanol: 10, midazolam: 5, alfaxalone: 10, propofol: 10, clavamox_iv: 100, atropine: 0.5, dobutamine_raw: 12.5, epinephrine: 1, };
+const concentrations = { lidocaine: 20, ketamine: 50, ketamine_diluted: 10, bupivacaine: 5, butorphanol: 10, midazolam: 5, alfaxalone: 10, propofol: 10, atropine: 0.5, dobutamine_raw: 12.5, epinephrine: 1, };
 let selectedTubeInfo = { size: null, cuff: false, notes: '' };
-
-// --- 퇴원약 데이터 ---
-const dischargeMedications = {
-    clavamox: { name: '클라바목스', dose: 12.5, freq: 2, strength: 250, defaultChecked: true, note: '항생제' },
-    meloxicam: { name: '멜록시캄(액)', dose: 0.1, freq: 1, strength: 1.5, unit: 'mL', defaultChecked: true, warning: 'renal', note: 'NSAID 소염진통제' },
-    gabapentin: { name: '가바펜틴', dose: 10, freq: 2, strength: 100, defaultChecked: true, note: '신경병증성 통증' },
-    tramadol: { name: '트라마돌', dose: 3, freq: 2, strength: 50, defaultChecked: false, note: '보조 진통제' },
-    famotidine: { name: '파모티딘', dose: 1, freq: 2, strength: 10, defaultChecked: false, note: '위장관 보호제' },
-    maropitant: { name: '마로피itant', dose: 2, freq: 1, strength: 16, defaultChecked: false, note: '진토제' },
-    ursa: { name: '우루사 (UDCA)', dose: 15, freq: 2, strength: 100, defaultChecked: false, warning: 'liver_support', note: '간 보조제' },
-    silymarin: { name: '실리마린', dose: 10, freq: 1, strength: 140, defaultChecked: false, warning: 'liver_support', note: '간 보조제' },
-    same: { name: 'SAMe', dose: 20, freq: 1, strength: 200, defaultChecked: false, warning: 'liver_support', note: '간 보조제' },
-};
 
 // --- 탭 관리 함수 ---
 function openTab(evt, tabName) {
@@ -31,6 +18,7 @@ function syncPatientName() {
     const mainName = document.getElementById('patient_name_main').value;
     const handoutName = document.getElementById('patientName');
     const dischargeName = document.getElementById('discharge_patient_name');
+
     if (handoutName) handoutName.value = mainName;
     if (dischargeName) dischargeName.textContent = mainName || '정보 없음';
 }
@@ -49,14 +37,16 @@ function calculateAll() {
             weightInputTube.value = '';
             calculateWeightSize();
         }
-        document.getElementById('discharge_patient_weight').textContent = '체중 입력 필요';
+        document.getElementById('discharge_patient_weight').textContent = '0';
+        calculateDischargeMeds(); // 체중 없어도 UI 업데이트
         return;
     }
     
     const weight = parseFloat(weightInput.value);
     if (isNaN(weight) || weight <= 0) {
         if(recommendationDiv) recommendationDiv.innerHTML = '';
-        document.getElementById('discharge_patient_weight').textContent = '유효한 체중 아님';
+        document.getElementById('discharge_patient_weight').textContent = '유효하지 않은 체중';
+        calculateDischargeMeds(); // 체중 없어도 UI 업데이트
         return;
     }
     
@@ -66,9 +56,12 @@ function calculateAll() {
         calculateWeightSize();
     }
     
+    // 환자 정보 연동
+    document.getElementById('discharge_patient_weight').textContent = weight;
+
     populatePrepTab(weight);
     populateEmergencyTab(weight);
-    populateDischargeTab(weight);
+    calculateDischargeMeds(); // 새 퇴원약 계산 함수 호출
     updatePatchRecommendation(weight);
 }
 
@@ -141,7 +134,6 @@ function populatePrepTab(weight) {
         </div>
     `;
 
-    // Other calculations remain the same
     const butorMl = (0.2 * weight) / concentrations.butorphanol;
     const midaMl = (0.2 * weight) / concentrations.midazolam;
     const lidoLoadMl = (1 * weight) / concentrations.lidocaine;
@@ -181,7 +173,6 @@ function populatePrepTab(weight) {
         <div class="p-3 bg-cyan-50 rounded-lg"><h4 class="font-bold text-cyan-800">수액 펌프</h4><p><span class="result-value">${fluidCorrected.toFixed(1)} mL/hr</span></p><p class="text-xs text-gray-500 mt-1">(목표: ${fluidTarget.toFixed(1)}mL/hr)</p></div>
     `;
     
-    // Re-apply the selection after rebuilding the DOM
     document.getElementById('antibiotic_selection').value = antibioticSelection;
 
     const alfaxanElement = document.getElementById('alfaxan_card');
@@ -189,7 +180,6 @@ function populatePrepTab(weight) {
         alfaxanElement.classList.toggle('highlight-recommendation', isCardiac);
     }
     
-    // The rest of the function remains the same
     const sites = parseInt(document.getElementById('dog_block_sites')?.value) || 4;
     document.getElementById('dog_nerve_block_result').innerHTML = `<div class="space-y-2"><label for="dog_block_sites" class="font-semibold text-gray-700">마취 부위 수:</label><select id="dog_block_sites" class="large-interactive-field" onchange="calculateAll()"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option></select></div><div class="p-3 border rounded-lg bg-gray-50 mt-4 text-center"><h4 class="font-semibold text-gray-800">총 준비 용량 (${sites}군데)</h4><p class="text-lg"><span class="result-value">${((0.1 * weight * sites)*0.8).toFixed(2)}mL</span> (부피) + <span class="result-value">${((0.1 * weight * sites)*0.2).toFixed(2)}mL</span> (리도)</p><p class="text-xs text-gray-500 mt-1">부위당 약 ${((0.1 * weight * sites) / sites).toFixed(2)} mL 주입</p></div>`;
     document.getElementById('dog_block_sites').value = sites;
@@ -216,87 +206,181 @@ function populateEmergencyTab(weight) {
     document.getElementById('cpa_protocol').innerHTML = `<ol class="list-decimal list-inside mt-2 space-y-2 text-sm"><li><span class="font-bold">BLS (기본소생술):</span> 즉시 100-120회/분 흉부압박, 6초에 1회 환기 시작.</li><li><span class="font-bold">ALS (전문소생술):</span> 2분마다 흉부압박 교대하며 아래 약물 투여.</li></ol><div class="mt-2 p-2 rounded-lg bg-red-100 space-y-2 text-center"><h5 class="font-semibold text-sm">에피네프린 (Low dose, 1차)</h5><p class="text-xs mb-1 font-semibold">희석법: 에피네프린 원액 0.1mL + N/S 0.9mL (총 1mL)</p><p class="font-bold text-red-700 text-xl">${epiLowMl.toFixed(2)} mL (희석액) IV</p><hr><h5 class="font-semibold text-sm">아트로핀 (Asystole/PEA 시)</h5><p class="font-bold text-red-700 text-xl">${atropineCpaMl.toFixed(2)} mL (${(atropineCpaMl*0.5).toFixed(2)} mg) IV</p><hr><h5 class="font-semibold text-sm">에피네프린 (High dose, 반응 없을 시)</h5><p class="font-bold text-red-700 text-xl">${epiHighMl.toFixed(2)} mL (원액) IV</p></div>`;
 }
 
-// --- 퇴원약 조제 탭 기능 ---
-function initializeDischargeTab() {
-    const container = document.getElementById('medication_selection_list');
-    let html = '';
-    for (const key in dischargeMedications) {
-        const med = dischargeMedications[key];
-        const isChecked = med.defaultChecked ? 'checked' : '';
-        html += `
-            <div id="med_card_${key}" class="p-3 border rounded-lg bg-white transition-all hover:shadow-md">
-                <div class="flex items-center justify-between">
-                    <label for="med_cb_${key}" class="flex items-center cursor-pointer">
-                        <input type="checkbox" id="med_cb_${key}" onchange="calculateAll()" class="h-5 w-5 rounded" ${isChecked}>
-                        <span class="ml-3 font-bold text-gray-800">${med.name}</span>
-                        <span class="ml-2 text-xs text-gray-500">(${med.note})</span>
-                    </label>
-                </div>
-                <div class="mt-2 flex items-center gap-2 text-sm pl-8">
-                    <input type="number" id="med_dose_${key}" value="${med.dose}" oninput="calculateAll()" class="w-16 p-1 border rounded text-center">
-                    <span class="text-gray-600">mg/kg</span>
-                    <input type="number" id="med_freq_${key}" value="${med.freq}" oninput="calculateAll()" class="w-12 p-1 border rounded text-center">
-                    <span class="text-gray-600">회/일</span>
-                </div>
-            </div>`;
-    }
-    container.innerHTML = html;
-}
-
-function populateDischargeTab(weight) {
-    document.getElementById('discharge_patient_weight').textContent = `${weight}`;
-    
-    const isRenal = document.getElementById('status_renal').checked;
-    const isLiver = document.getElementById('status_liver').checked;
-
-    // 간 이상 시 간 보조제 자동 선택
-    if (isLiver) {
-        document.getElementById('med_cb_ursa').checked = true;
-        document.getElementById('med_cb_silymarin').checked = true;
-        document.getElementById('med_cb_same').checked = true;
-    }
-
-    let summary3dayHTML = '';
-    let summary7dayHTML = '';
-
-    const calculatePills = (days, dose, freq, strength, unit = '정') => {
-        const pillsPerDose = dose * weight / strength;
-        if (unit === 'mL') {
-            const totalMl = pillsPerDose * freq * days;
-            return `총 <strong class="text-blue-600">${totalMl.toFixed(2)} mL</strong> (1회 ${pillsPerDose.toFixed(2)} mL, ${freq}회/일)`;
-        }
-        const totalPills = Math.ceil(pillsPerDose * freq * days * 2) / 2;
-        return `총 <strong class="text-blue-600">${totalPills.toFixed(1).replace('.0', '')} ${unit}</strong> (1회 ${pillsPerDose.toFixed(2)} ${unit}, ${freq}회/일)`;
+// --- 퇴원약 조제 탭 (V2) 기능 ---
+function initializeDischargeTabV2() {
+    // 기본 처방 설정
+    const defaultMeds = {
+        '7day': ['clindamycin', 'gabapentin', 'famotidine', 'almagel'],
+        '3day': ['vetrocam', 'misoprostol', 'acetaminophen']
     };
 
-    for (const key in dischargeMedications) {
-        const med = dischargeMedications[key];
-        const isChecked = document.getElementById(`med_cb_${key}`).checked;
-        const medCard = document.getElementById(`med_card_${key}`);
-        
-        // 하이라이트 클래스 초기화
-        medCard.classList.remove('highlight-renal', 'highlight-liver');
-
-        if (med.warning === 'renal' && isRenal) {
-            medCard.classList.add('highlight-renal');
+    // 7일짜리 기본 처방 선택
+    defaultMeds['7day'].forEach(drugName => {
+        const row = document.querySelector(`#dischargeTab tr[data-drug="${drugName}"]`);
+        if (row) {
+            row.querySelector('.med-checkbox').checked = true;
+            row.querySelector('.days').value = 7;
         }
-        if ((med.note.includes('간') || med.warning === 'liver_support') && isLiver) {
-            medCard.classList.add('highlight-liver');
-        }
+    });
 
-        if (isChecked) {
-            const dose = parseFloat(document.getElementById(`med_dose_${key}`).value) || med.dose;
-            const freq = parseInt(document.getElementById(`med_freq_${key}`).value) || med.freq;
-            
-            summary3dayHTML += `<li><strong>${med.name}:</strong> ${calculatePills(3, dose, freq, med.strength, med.unit)}</li>`;
-            summary7dayHTML += `<li><strong>${med.name}:</strong> ${calculatePills(7, dose, freq, med.strength, med.unit)}</li>`;
+    // 3일짜리 기본 처방 선택
+    defaultMeds['3day'].forEach(drugName => {
+        const row = document.querySelector(`#dischargeTab tr[data-drug="${drugName}"]`);
+        if (row) {
+            row.querySelector('.med-checkbox').checked = true;
+            row.querySelector('.days').value = 3;
         }
-    }
+    });
 
-    document.getElementById('summary_3_day').innerHTML = summary3dayHTML || '<li class="text-gray-500">선택된 약물이 없습니다.</li>';
-    document.getElementById('summary_7_day').innerHTML = summary7dayHTML || '<li class="text-gray-500">선택된 약물이 없습니다.</li>';
+    const inputs = document.querySelectorAll('#dischargeTab .med-checkbox, #dischargeTab .days, #dischargeTab .dose');
+    inputs.forEach(input => {
+        input.addEventListener('change', calculateDischargeMeds);
+        input.addEventListener('keyup', calculateDischargeMeds);
+    });
+
+    calculateDischargeMeds();
 }
 
+function calculateDischargeMeds() {
+    const weight = parseFloat(document.getElementById('weight').value);
+    const isLiverIssue = document.getElementById('status_liver').checked;
+    const isKidneyIssue = document.getElementById('status_renal').checked;
+
+    // 간 이상 시 간 보조제 자동 선택
+    if (isLiverIssue) {
+        ['udca', 'silymarin', 'same'].forEach(drugName => {
+            const row = document.querySelector(`#dischargeTab tr[data-drug="${drugName}"]`);
+            if (row) {
+                row.querySelector('.med-checkbox').checked = true;
+                row.querySelector('.days').value = 7;
+            }
+        });
+    }
+
+    if (isNaN(weight) || weight <= 0) {
+        updateDischargeSummaryUI({});
+        updateDischargeWarnings();
+        return;
+    }
+    
+    const summaryData = {};
+
+    document.querySelectorAll('#dischargeTab .med-checkbox:checked').forEach(checkbox => {
+        const row = checkbox.closest('tr');
+        const drugName = row.querySelector('td:nth-child(2)').textContent;
+        const days = parseInt(row.querySelector('.days').value);
+        const unit = row.dataset.unit;
+        let totalAmount = 0;
+        let totalAmountText = '';
+        let dailyMultiplier = 2; // 1일 2회 투여 기본 (BID)
+
+        if (row.dataset.special === 'vetrocam') {
+            dailyMultiplier = 1; // 1일 1회
+            const day1Dose = weight * 0.2;
+            const otherDaysDose = weight * 0.1 * (days - 1);
+            totalAmount = day1Dose + (days > 1 ? otherDaysDose : 0);
+            totalAmountText = `${totalAmount.toFixed(1)} ${unit}`;
+        } else if (row.dataset.special === 'same') {
+            dailyMultiplier = 1; // 1일 1회
+            totalAmount = (weight / 2.5) * 0.25 * days;
+            totalAmountText = `${totalAmount.toFixed(1)} ${unit}`;
+        } else if (row.dataset.special === 'marbofloxacin') {
+            dailyMultiplier = 1; // 1일 1회
+            const dose = parseFloat(row.querySelector('.dose').value);
+            const strength = parseFloat(row.dataset.strength);
+            totalAmount = (weight * dose * dailyMultiplier * days) / strength;
+            totalAmountText = `${totalAmount.toFixed(1)} ${unit}`;
+        } else if (row.dataset.special === 'paramel') {
+             dailyMultiplier = 2;
+             const dose = 0.75;
+             totalAmount = weight * dose * dailyMultiplier * days;
+             totalAmountText = `${totalAmount.toFixed(1)} ${unit}`;
+        } else {
+            const dose = parseFloat(row.querySelector('.dose').value);
+            const strength = parseFloat(row.dataset.strength);
+            if (strength > 0) {
+                 if (['udca', 'silymarin', 'itraconazole'].includes(row.dataset.drug)) {
+                     dailyMultiplier = 2;
+                 }
+                totalAmount = (weight * dose * dailyMultiplier * days) / strength;
+                totalAmountText = `${totalAmount.toFixed(1)} ${unit}`;
+            } else {
+                totalAmountText = "함량 필요";
+            }
+        }
+         
+        row.querySelector('.total-amount').textContent = totalAmountText;
+
+        if (!summaryData[days]) {
+            summaryData[days] = [];
+        }
+        
+        let summaryText = `${drugName.split(' (')[0]} ${totalAmountText}`;
+        if (dailyMultiplier === 1) {
+             summaryText += ' (1일 1회)';
+        }
+        
+        const isLiverDanger = row.querySelector('.notes').dataset.liver === 'true' && isLiverIssue;
+        const isKidneyDanger = row.querySelector('.notes').dataset.kidney === 'true' && isKidneyIssue;
+
+        summaryData[days].push({
+            text: summaryText,
+            isDanger: isLiverDanger || isKidneyDanger
+        });
+    });
+
+    updateDischargeSummaryUI(summaryData);
+    updateDischargeWarnings();
+}
+
+function updateDischargeSummaryUI(summaryData) {
+    const summaryContainer = document.getElementById('discharge_summary');
+    summaryContainer.innerHTML = '';
+
+    const sortedDays = Object.keys(summaryData).sort((a, b) => a - b);
+
+    if (sortedDays.length === 0) {
+        summaryContainer.innerHTML = '<p class="text-gray-500 col-span-full text-center">조제할 약물을 선택해주세요.</p>';
+        return;
+    }
+
+    sortedDays.forEach(day => {
+        const box = document.createElement('div');
+        box.className = 'summary-box p-4 bg-blue-50 border border-blue-200 rounded-lg';
+        
+        const title = document.createElement('h3');
+        title.className = 'font-bold text-blue-800 mb-2 text-lg';
+        title.textContent = `${day}일 처방`;
+        box.appendChild(title);
+
+        const list = document.createElement('ul');
+        list.className = 'space-y-1';
+        summaryData[day].forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'text-gray-700';
+            if (item.isDanger) {
+                li.innerHTML = `<span class="danger font-bold text-red-600">${item.text}</span>`;
+            } else {
+                li.textContent = item.text;
+            }
+            list.appendChild(li);
+        });
+        box.appendChild(list);
+        summaryContainer.appendChild(box);
+    });
+}
+
+function updateDischargeWarnings() {
+    const liverIssue = document.getElementById('status_liver').checked;
+    const kidneyIssue = document.getElementById('status_renal').checked;
+
+    document.querySelectorAll('#dischargeTab .notes').forEach(noteCell => {
+        noteCell.classList.remove('highlight-warning');
+        if ((liverIssue && noteCell.dataset.liver === 'true') || (kidneyIssue && noteCell.dataset.kidney === 'true')) {
+            noteCell.classList.add('highlight-warning');
+        }
+    });
+}
 
 // --- 보호자 교육 및 저장 기능 ---
 function calculateRemovalDate() {
@@ -468,16 +552,19 @@ function saveRecords() {
         const element = document.getElementById(id);
         if (element) data[id] = element.checked;
     });
-    // 퇴원약 정보 저장
-    data.dischargeMeds = {};
-    for (const key in dischargeMedications) {
-        data.dischargeMeds[key] = {
-            checked: document.getElementById(`med_cb_${key}`)?.checked,
-            dose: document.getElementById(`med_dose_${key}`)?.value,
-            freq: document.getElementById(`med_freq_${key}`)?.value,
-        };
-    }
     data.selectedTubeInfo = selectedTubeInfo;
+    
+    // 퇴원약 정보 저장 (V2)
+    data.dischargeMedsV2 = [];
+    document.querySelectorAll('#dischargeTab .med-checkbox').forEach(cb => {
+        const row = cb.closest('tr');
+        data.dischargeMedsV2.push({
+            drug: row.dataset.drug,
+            checked: cb.checked,
+            days: row.querySelector('.days').value,
+            dose: row.querySelector('.dose')?.value
+        });
+    });
 
     const jsonString = JSON.stringify(data, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
@@ -509,18 +596,21 @@ function loadRecords(event) {
                 const element = document.getElementById(id);
                 if (element && data[id] !== undefined) element.checked = data[id];
             });
-            // 퇴원약 정보 불러오기
-            if (data.dischargeMeds) {
-                for (const key in data.dischargeMeds) {
-                    const medData = data.dischargeMeds[key];
-                    if (document.getElementById(`med_cb_${key}`)){
-                        document.getElementById(`med_cb_${key}`).checked = medData.checked;
-                        document.getElementById(`med_dose_${key}`).value = medData.dose;
-                        document.getElementById(`med_freq_${key}`).value = medData.freq;
-                    }
-                }
-            }
             if (data.selectedTubeInfo) selectedTubeInfo = data.selectedTubeInfo;
+
+            // 퇴원약 정보 불러오기 (V2)
+            if(data.dischargeMedsV2) {
+                data.dischargeMedsV2.forEach(medData => {
+                    const row = document.querySelector(`#dischargeTab tr[data-drug="${medData.drug}"]`);
+                    if(row) {
+                        row.querySelector('.med-checkbox').checked = medData.checked;
+                        row.querySelector('.days').value = medData.days;
+                        if(row.querySelector('.dose')) {
+                           row.querySelector('.dose').value = medData.dose;
+                        }
+                    }
+                });
+            }
             
             calculateAll();
             calculateRemovalDate();
@@ -552,7 +642,9 @@ function saveDashboardAsImage() {
 
 // --- DOM 로드 후 실행 ---
 document.addEventListener('DOMContentLoaded', () => {
-    initializeDischargeTab();
+    // 퇴원약 탭 V2 초기화
+    initializeDischargeTabV2(); 
+    
     calculateAll();
     
     const attachDateEl = document.getElementById('attachDate');
@@ -577,4 +669,4 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('calculate-trachea-btn').addEventListener('click', calculateTracheaSize);
     document.getElementById('trachea-input').addEventListener('keydown', (event) => { if (event.key === 'Enter') calculateTracheaSize(); });
     document.getElementById('saveEtTubeSelection').addEventListener('click', saveAndDisplayTubeSelection);
-});```
+});
