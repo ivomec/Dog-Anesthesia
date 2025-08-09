@@ -52,14 +52,13 @@
             to { opacity: 1 }
         }
         @media print {
-            body { -webkit-print-color-adjust: exact; color-adjust: exact; --tw-bg-opacity: 1; background-color: rgb(255 255 255 / var(--tw-bg-opacity)) }
-            .no-print { display: none }
-            .card { border-width: 0; box-shadow: none }
-            #educationTab input[type=text], #educationTab input[type=date], #educationTab input[type=time] { border-width: 0 !important; background-color: transparent !important; padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; padding-left: 0 !important; padding-right: 0 !important; font-size: 1rem; color: #000 }
-            #educationTab #removalInfo { border-width: 2px !important; border-color: #facc15 !important }
-            #educationTab #captureArea { border-width: 0 !important; box-shadow: none !important }
+            body { -webkit-print-color-adjust: exact; color-adjust: exact; }
+            .no-print { display: none; }
+            .card, #captureArea, #protocolTab .card { border-width: 0; box-shadow: none; }
+            input[type=text], input[type=date], input[type=time] { border-width: 0 !important; background-color: transparent !important; padding: 0.5rem 0 !important; font-size: 1rem; color: #000; }
+            #removalInfo { border: 2px solid #facc15 !important; }
         }
-        input[type=date]::-webkit-calendar-picker-indicator, input[type=time]::-webkit-calendar-picker-indicator { cursor: pointer; filter: invert(.5) sepia(1) saturate(5) hue-rotate(200deg) }
+        input[type=date]::-webkit-calendar-picker-indicator, input[type=time]::-webkit-calendar-picker-indicator { cursor: pointer; filter: invert(.5) sepia(1) saturate(5) hue-rotate(200deg); }
         body { font-family: Noto Sans KR, sans-serif; --tw-bg-opacity: 1; background-color: rgb(240 244 248 / var(--tw-bg-opacity)); padding: 1.5rem }
         .max-w-7xl { max-width: 80rem }
         .mx-auto { margin-left: auto; margin-right: auto }
@@ -213,7 +212,7 @@
         .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)) }
         .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) }
         .uppercase { text-transform: uppercase }
-        .shadow-md:hover { --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / .1), 0 2px 4px -2px rgb(0 0 0 / .1); --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color); box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow) }
+        .shadow-md\:hover { --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / .1), 0 2px 4px -2px rgb(0 0 0 / .1); --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color); box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow) }
         .focus\:ring-blue-500:focus { --tw-ring-opacity: 1; --tw-ring-color: rgb(59 130 246 / var(--tw-ring-opacity)) }
         .focus\:border-blue-500:focus { --tw-border-opacity: 1; border-color: rgb(59 130 246 / var(--tw-border-opacity)) }
         .transition { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-backdrop-filter; transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter; transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-backdrop-filter; transition-timing-function: cubic-bezier(.4,0,.2,1); transition-duration: .15s }
@@ -237,10 +236,10 @@
         .ml-3 { margin-left: .75rem }
         .mr-1 { margin-right: .25rem }
         .min-h-\[40px\] { min-height: 40px }
-        #dischargeTab table { width: 100%; border-collapse: collapse; margin-top: 1.25rem; }
-        #dischargeTab th, #dischargeTab td { border: 1px solid #e5e7eb; padding: 0.75rem; text-align: left; vertical-align: middle; font-size: 0.875rem; }
-        #dischargeTab th { background-color: #f3f4f6; color: #374151; font-weight: 600; }
-        #dischargeTab tr:nth-child(even) { background-color: #f9fafb; }
+        #dischargeTab table, #protocolTab table, #etTubeTab table { width: 100%; border-collapse: collapse; margin-top: 1.25rem; }
+        #dischargeTab th, #dischargeTab td, #protocolTab th, #protocolTab td, #etTubeTab th, #etTubeTab td { border: 1px solid #e5e7eb; padding: 0.75rem; text-align: left; vertical-align: middle; font-size: 0.875rem; }
+        #dischargeTab th, #protocolTab th, #etTubeTab th { background-color: #f3f4f6; color: #374151; font-weight: 600; text-align: center;}
+        #dischargeTab tr:nth-child(even), #protocolTab tr:nth-child(even), #etTubeTab tr:nth-child(even) { background-color: #f9fafb; }
         #dischargeTab .med-table input[type="number"] { width: 80px; padding: 5px; text-align: center; border-radius: 0.25rem; border: 1px solid #d1d5db;}
         #dischargeTab .med-table input[type="checkbox"] { width: 1.25rem; height: 1.25rem; }
         #dischargeTab .highlight-warning { background-color: #fef9c3 !important; }
@@ -343,7 +342,7 @@
 
                 <h2 class="section-title">수술 전 약물 준비 (Pre-Anesthetic Drug Prep)</h2>
                 <div class="info-box mb-4"><p><strong>목표:</strong> 마취에 필요한 모든 주사 약물과 수액을 미리 정확한 용량으로 준비하여, 마취 과정 중 실수를 방지하고 신속하게 대처합니다.</p></div>
-                <div id="pre_op_drugs_result" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 text-center">...</div>
+                <div id="pre_op_drugs_result" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-center">...</div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="card p-6 md:p-8">
@@ -428,25 +427,17 @@
                             <h3 class="text-xl font-bold mb-4 text-center text-gray-800">체중별 사이즈 가이드</h3>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-center text-xs sm:text-sm">
-                                    <thead class="bg-gray-200">
-                                        <tr>
-                                            <th class="px-2 py-2">~1kg</th><th class="px-2 py-2">2kg</th><th class="px-2 py-2">3.5kg</th><th class="px-2 py-2">4+kg</th><th class="px-2 py-2">6kg</th><th class="px-2 py-2">8kg</th>
-                                        </tr>
+                                    <thead>
+                                        <tr><th>~1kg</th><th>~2kg</th><th>~3.5kg</th><th>~4kg</th><th>~5kg</th><th>~6kg</th></tr>
                                     </thead>
                                     <tbody class="divide-x divide-gray-200 bg-white">
-                                        <tr class="font-bold text-base sm:text-lg">
-                                            <td class="px-2 py-3">3.0</td><td class="px-2 py-3">3.5</td><td class="px-2 py-3">4.0</td><td class="px-2 py-3">4.5</td><td class="px-2 py-3">5.5</td><td class="px-2 py-3">6.0</td>
-                                        </tr>
+                                        <tr class="font-bold text-base sm:text-lg"><td>2.0</td><td>2.5</td><td>3.0</td><td>3.5</td><td>4.0</td><td>4.5</td></tr>
                                     </tbody>
-                                    <thead class="bg-gray-200">
-                                        <tr>
-                                            <th class="px-2 py-2">9kg</th><th class="px-2 py-2">12kg</th><th class="px-2 py-2">14kg</th><th class="px-2 py-2">20kg</th><th class="px-2 py-2">30kg</th><th class="px-2 py-2">40kg</th>
-                                        </tr>
+                                    <thead>
+                                        <tr><th>~7kg</th><th>~8kg</th><th>~9kg</th><th>~12kg</th><th>~14kg</th><th>~40kg</th></tr>
                                     </thead>
                                      <tbody class="divide-x divide-gray-200 bg-white">
-                                        <tr class="font-bold text-base sm:text-lg">
-                                            <td class="px-2 py-3">7.0</td><td class="px-2 py-3">7.0</td><td class="px-2 py-3">7.5</td><td class="px-2 py-3">9.0</td><td class="px-2 py-3">11</td><td class="px-2 py-3">13</td>
-                                        </tr>
+                                        <tr class="font-bold text-base sm:text-lg"><td>5.5</td><td>6.0</td><td>6.5</td><td>7.0</td><td>7.5</td><td>9.0</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -471,22 +462,22 @@
                             <h3 class="text-xl font-bold mb-4 text-center text-gray-800">기관 직경별 사이즈 가이드</h3>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-center text-sm">
-                                    <thead class="bg-gray-200">
-                                        <tr><th class="px-3 py-2">기관 직경(mm)</th><th class="px-3 py-2">ET Tube ID</th><th class="px-3 py-2">OD(참고)</th></tr>
+                                    <thead>
+                                        <tr><th>기관 직경(mm)</th><th>ET Tube ID</th><th>OD(참고)</th></tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-200 bg-white">
-                                        <tr><td class="px-3 py-2">5.13</td><td class="px-3 py-2 font-bold">2.5</td><td class="px-3 py-2">4.1</td></tr>
-                                        <tr><td class="px-3 py-2">5.88</td><td class="px-3 py-2 font-bold">3.0</td><td class="px-3 py-2">4.7</td></tr>
-                                        <tr><td class="px-3 py-2">6.63</td><td class="px-3 py-2 font-bold">3.5</td><td class="px-3 py-2">5.3</td></tr>
-                                        <tr><td class="px-3 py-2">7.50</td><td class="px-3 py-2 font-bold">4.0</td><td class="px-3 py-2">6.0</td></tr>
-                                        <tr><td class="px-3 py-2">8.13</td><td class="px-3 py-2 font-bold">4.5</td><td class="px-3 py-2">6.5</td></tr>
-                                        <tr><td class="px-3 py-2">8.38</td><td class="px-3 py-2 font-bold">5.0</td><td class="px-3 py-2">6.7</td></tr>
-                                        <tr><td class="px-3 py-2">9.13</td><td class="px-3 py-2 font-bold">5.5</td><td class="px-3 py-2">7.3</td></tr>
-                                        <tr><td class="px-3 py-2">10.00</td><td class="px-3 py-2 font-bold">6.0</td><td class="px-3 py-2">8.0</td></tr>
-                                        <tr><td class="px-3 py-2">11.38</td><td class="px-3 py-2 font-bold">6.5</td><td class="px-3 py-2">9.1</td></tr>
-                                        <tr><td class="px-3 py-2">11.63</td><td class="px-3 py-2 font-bold">7.0</td><td class="px-3 py-2">9.3</td></tr>
-                                        <tr><td class="px-3 py-2">12.50</td><td class="px-3 py-2 font-bold">7.5</td><td class="px-3 py-2">10.0</td></tr>
-                                        <tr><td class="px-3 py-2">13.38</td><td class="px-3 py-2 font-bold">8.0</td><td class="px-3 py-2">10.7</td></tr>
+                                        <tr><td>5.13</td><td class="font-bold">2.5</td><td>4.1</td></tr>
+                                        <tr><td>5.88</td><td class="font-bold">3.0</td><td>4.7</td></tr>
+                                        <tr><td>6.63</td><td class="font-bold">3.5</td><td>5.3</td></tr>
+                                        <tr><td>7.50</td><td class="font-bold">4.0</td><td>6.0</td></tr>
+                                        <tr><td>8.13</td><td class="font-bold">4.5</td><td>6.5</td></tr>
+                                        <tr><td>8.38</td><td class="font-bold">5.0</td><td>6.7</td></tr>
+                                        <tr><td>9.13</td><td class="font-bold">5.5</td><td>7.3</td></tr>
+                                        <tr><td>10.00</td><td class="font-bold">6.0</td><td>8.0</td></tr>
+                                        <tr><td>11.38</td><td class="font-bold">6.5</td><td>9.1</td></tr>
+                                        <tr><td>11.63</td><td class="font-bold">7.0</td><td>9.3</td></tr>
+                                        <tr><td>12.50</td><td class="font-bold">7.5</td><td>10.0</td></tr>
+                                        <tr><td>13.38</td><td class="font-bold">8.0</td><td>10.7</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -618,185 +609,23 @@
         </div>
 
         <div id="protocolTab" class="tab-content">
-            <div id="patch_recommendation" class="mb-6"></div>
             <div class="card p-6 md:p-8">
-                <header class="border-b-2 border-blue-600 pb-4 mb-8">
-                    <h1 class="text-3xl md:text-4xl font-bold text-blue-800">부프레노르핀 패치 임상 프로토콜 (SOP)</h1>
-                    <p class="text-lg text-gray-600 mt-2">금호동물병원 | 최종 개정일: 2025-08-02</p>
-                </header>
-                <section class="mb-10">
-                    <h2 class="text-2xl font-bold text-gray-800 border-l-4 border-blue-500 pl-3 mb-4">1. 목적 (Purpose)</h2>
-                    <p class="text-gray-700">본 지침은 고양이 환자에게 중등도 이상의 수술 후 통증 또는 만성 통증 관리를 위해 부프레노르핀 경피 패치를 안전하고 효과적으로 사용하는 표준 절차를 확립하는 것을 목적으로 한다.</p>
-                </section>
-                <section class="mb-10">
-                    <h2 class="text-2xl font-bold text-gray-800 border-l-4 border-blue-500 pl-3 mb-4">2. 적용 대상 및 금기</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-                            <h3 class="text-lg font-bold text-green-800 mb-2">✅ 적용 대상 (Indications)</h3>
-                            <ul class="list-disc list-inside space-y-1 text-gray-700">
-                                <li><strong>주 적용 동물:</strong> 고양이</li>
-                                <li><strong>수술 후 통증 관리:</strong> 전발치, 정형외과 수술, 개복술 등</li>
-                                <li><strong>만성 통증 관리:</strong> 퇴행성 관절 질환(DJD), 종양성 통증, 만성 구내염</li>
-                                <li><strong>만성 신부전(CKD) 환자의 통증 관리</strong></li>
-                            </ul>
-                        </div>
-                        <div class="bg-red-50 p-4 rounded-lg border border-red-200">
-                            <h3 class="text-lg font-bold text-red-800 mb-2">❌ 금기 및 주의 (Contraindications & Cautions)</h3>
-                            <ul class="list-disc list-inside space-y-1 text-gray-700">
-                                <li><strong>개:</strong> 흡수율의 예측 불가능성</li>
-                                <li><strong>급성/중증 통증의 단독 치료</strong></li>
-                                <li>체온 조절 이상(고체온/저체온) 환자</li>
-                                <li>부착 부위 피부 질환 또는 상처</li>
-                                <li><strong>심각한 간 기능 부전 환자</strong> (용량 조절 및 집중 모니터링 필요)</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-                <section class="mb-10">
-                    <h2 class="text-2xl font-bold text-gray-800 border-l-4 border-blue-500 pl-3 mb-4">3. 용량 계산 및 선택</h2>
-                    <div class="bg-blue-50 p-4 rounded-lg mb-6">
-                        <p class="font-bold text-blue-800 text-center text-lg">목표 용량 (Target Dose): 5-10 mcg/kg/hour</p>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead class="bg-gray-200">
-                                <tr>
-                                    <th class="p-3 font-bold uppercase text-gray-600 border border-gray-300">체중 (kg)</th>
-                                    <th class="p-3 font-bold uppercase text-gray-600 border border-gray-300">시간당 필요 용량 (mcg/h)</th>
-                                    <th class="p-3 font-bold uppercase text-gray-600 border border-gray-300">추천 패치 (노스판®)</th>
-                                    <th class="p-3 font-bold uppercase text-gray-600 border border-gray-300">임상적 고려사항</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="hover:bg-gray-50"><td class="p-3 text-gray-800 border border-gray-300">~ 3.0 kg</td><td class="p-3 text-gray-800 border border-gray-300">15 ~ 30</td><td class="p-3 text-gray-800 border border-gray-300 font-semibold">5 mcg/h 1매</td><td class="p-3 text-gray-800 border border-gray-300">목표 용량에 미달할 수 있으므로, 반드시 다른 진통제(가바펜틴 등)와 병용해야 합니다.</td></tr>
-                                <tr class="hover:bg-gray-50"><td class="p-3 text-gray-800 border border-gray-300">3.1 ~ 6.0 kg</td><td class="p-3 text-gray-800 border border-gray-300">15.5 ~ 60</td><td class="p-3 text-gray-800 border border-gray-300 font-semibold">10 mcg/h 1매</td><td class="p-3 text-gray-800 border border-gray-300">체중 범위가 넓어 용량 부족 가능성이 높습니다. **적극적인 다중 진통 프로토콜이 필수적입니다.**</td></tr>
-                                <tr class="hover:bg-gray-50"><td class="p-3 text-gray-800 border border-gray-300">> 6.0 kg</td><td class="p-3 text-gray-800 border border-gray-300">30+</td><td class="p-3 text-gray-800 border border-gray-300 font-semibold">20 mcg/h 1매</td><td class="p-3 text-gray-800 border border-gray-300">패치 단독 사용은 부적절합니다. **다른 진통 요법의 보조적인 수단으로만 사용합니다.**</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="bg-red-600 text-white text-center font-bold p-3 rounded-lg mt-6">🚨 경고: 패치는 절대 자르지 말 것 (NEVER CUT THE PATCH)! 약물 방출 조절막이 파괴되어 과용량(Dose Dumping) 위험이 있습니다.</div>
-                </section>
-                </div>
+                <!-- 프로토콜 내용이 여기에 삽입됩니다 -->
+            </div>
         </div>
 
         <div id="educationTab" class="tab-content">
-            <div class="card p-6 md:p-8">
-                 <div class="no-print bg-white p-4 rounded-lg shadow-md mb-6 flex flex-col sm:flex-row gap-3 justify-center">
-                    <button onclick="saveAsPDF()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" /></svg>
-                        🖨️ 인쇄 또는 PDF로 저장
+             <div class="card p-6 md:p-8">
+                <div class="no-print bg-white p-4 rounded-lg shadow-md mb-6 flex flex-col sm:flex-row gap-3 justify-center">
+                    <button onclick="saveHandoutAsPDF()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center">
+                        <i class="fas fa-print mr-2"></i> 🖨️ 인쇄 또는 PDF로 저장
                     </button>
                     <button onclick="saveHandoutAsImage()" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" /></svg>
-                        🖼️ 이미지(PNG)로 저장
+                        <i class="fas fa-image mr-2"></i> 🖼️ 이미지(PNG)로 저장
                     </button>
                 </div>
-        
                 <div id="captureArea" class="bg-white rounded-xl shadow-lg p-6 sm:p-10 border border-gray-200">
-                    
-                    <header class="text-center mb-10">
-                        <h1 class="text-3xl md:text-4xl font-bold text-blue-800">금호동물병원</h1>
-                        <h2 class="text-xl md:text-2xl font-semibold text-gray-700 mt-3">우리 아이를 위한 통증 관리 패치 안내문</h2>
-                    </header>
-        
-                    <div class="border-y border-gray-200 py-5 mb-10 space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="flex items-center">
-                                <label for="patientName" class="font-semibold text-gray-600 mr-3 w-24 text-right">환자 이름:</label>
-                                <input type="text" id="patientName" name="patientName" placeholder="아이 이름 입력" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition duration-300">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                             <div class="flex items-center">
-                                <label for="attachDate" class="font-semibold text-gray-600 mr-3 w-24 text-right">부착 날짜:</label>
-                                <input type="date" id="attachDate" name="attachDate" onchange="calculateRemovalDate()" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition duration-300 cursor-pointer">
-                            </div>
-                            <div class="flex items-center">
-                                <label for="attachTime" class="font-semibold text-gray-600 mr-3 w-24 text-right">부착 시간:</label>
-                                <input type="time" id="attachTime" name="attachTime" onchange="calculateRemovalDate()" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition duration-300 cursor-pointer">
-                            </div>
-                        </div>
-                        <div id="removalInfo" class="mt-4 p-4 bg-yellow-100 border-2 border-yellow-400 rounded-lg text-center transition-all duration-300">
-                            <p class="font-bold text-yellow-900">날짜와 시간을 입력하면 제거일이 계산됩니다.</p>
-                        </div>
-                    </div>
-        
-                    <p class="text-gray-700 text-base md:text-lg mb-10 text-center leading-relaxed">
-                        사랑하는 보호자님, 저희 병원을 믿고 소중한 아이를 맡겨주셔서 감사합니다.<br>
-                        우리 아이가 수술 후 통증 없이 편안하게 회복할 수 있도록, **'부프레노르핀'이라는 성분의 진통 패치**를 부착했습니다.<br>
-                        아래 내용을 잘 읽어보시고, 아이가 잘 회복할 수 있도록 함께 보살펴 주세요.
-                    </p>
-        
-                    <div class="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-md mb-10">
-                        <h3 class="text-xl font-bold text-blue-900 mb-2">✅ 이 패치는 어떤 역할을 하나요?</h3>
-                        <ul class="list-disc list-inside text-gray-700 space-y-1 text-base">
-                            <li>약 3~4일 동안 진통제가 서서히 방출되어, 아이가 통증 없이 편안하게 지낼 수 있도록 돕는 **'지속형 진통 패치'**입니다.</li>
-                            <li>잦은 주사나 약 복용의 스트레스를 줄여주는 장점이 있습니다.</li>
-                        </ul>
-                    </div>
-        
-                    <div class="mb-10">
-                        <h3 class="text-2xl font-bold text-gray-800 text-center mb-4">👀 우리 아이, 이렇게 관찰해주세요!</h3>
-                        <p class="text-center text-gray-500 mb-6">아이의 행동 변화는 약효가 잘 나타나고 있다는 긍정적인 신호일 수 있습니다. 너무 걱정하지 마세요!</p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="bg-green-50 rounded-lg p-5 border border-green-200">
-                                <h4 class="text-xl font-bold text-green-800 flex items-center mb-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    이런 모습은 괜찮아요
-                                </h4>
-                                <ul class="list-disc list-inside space-y-3 text-gray-700">
-                                    <li><strong>잠이 늘거나 얌전해져요.</strong><br><span class="text-sm text-gray-500">몸이 편안하고 통증이 줄었다는 신호일 수 있습니다.</span></li>
-                                    <li><strong>평소보다 말이 많아지거나, 몸을 많이 비벼요.</strong><br><span class="text-sm text-gray-500">일부 고양이의 정상적인 약물 반응으로 보통 1~2일 내 사라져요.</span></li>
-                                    <li><strong>눈동자가 평소보다 커져 보여요.</strong><br><span class="text-sm text-gray-500">진통제의 일반적인 효과 중 하나입니다.</span></li>
-                                    <li><strong>식욕이 약간 줄어들어요.</strong><br><span class="text-sm text-gray-500">일시적일 수 있으니, 물을 잘 마시는지 확인해주세요.</span></li>
-                                </ul>
-                            </div>
-                            <div class="bg-red-50 rounded-lg p-5 border border-red-200">
-                                <h4 class="text-xl font-bold text-red-800 flex items-center mb-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                                    이런 모습은 바로 연락주세요
-                                </h4>
-                                <ul class="list-disc list-inside space-y-3 text-gray-700">
-                                    <li><strong>숨을 헐떡이거나 힘겹게 쉬어요.</strong><br><span class="text-sm text-gray-500">호흡이 분당 40회 이상으로 지속될 때</span></li>
-                                    <li><strong>몸을 전혀 움직이지 못하고 축 늘어져요.</strong><br><span class="text-sm text-gray-500">이름을 불러도 반응이 거의 없을 때</span></li>
-                                    <li><strong>구토나 설사를 3회 이상 반복해요.</strong><br><span class="text-sm text-gray-500">탈수나 다른 문제의 신호일 수 있습니다.</span></li>
-                                    <li><strong>패치가 떨어졌거나, 아이가 핥거나 씹고 있어요.</strong><br><span class="text-sm text-gray-500">과용량 위험이 있으니 즉시 연락주세요.</span></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-        
-                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-5 rounded-md mb-10">
-                        <h3 class="text-xl font-bold text-yellow-900 mb-3">🔥 보호자님, 이것만은 꼭! 지켜주세요</h3>
-                        <ol class="list-decimal list-inside text-gray-700 space-y-3">
-                            <li><strong>가장 중요! 열 주의 🔥</strong><br><strong>전기장판, 핫팩, 온열 램프, 드라이기 등</strong> 패치 부위에 열이 가해지지 않도록 **절대적으로** 주의해주세요. 약물이 과다 흡수되어 위험할 수 있습니다.</li>
-                            <li><strong>패치 보호</strong><br>아이가 패치를 핥거나, 긁거나, 떼어내지 않도록 지켜봐 주세요. 필요 시 넥카라나 환자복을 착용시켜 주세요.</li>
-                            <li><strong>안전한 환경</strong><br>다른 반려동물이나 어린이가 패치를 만지거나 핥지 않도록 주의해주세요.</li>
-                            <li><strong>안전한 폐기</strong><br>패치를 제거할 때는 접착면끼리 마주 보게 반으로 접어, 아이의 손이 닿지 않는 곳에 안전하게 버려주세요.</li>
-                        </ol>
-                    </div>
-        
-                    <footer class="border-t border-gray-200 pt-8 text-center">
-                        <h3 class="text-xl font-semibold text-gray-800">궁금하거나 걱정되는 점이 있다면?</h3>
-                        <p class="text-gray-600 mt-2">사소한 걱정이라도 괜찮으니, 주저 말고 아래 연락처로 문의해 주세요.</p>
-                        <div class="mt-4 bg-gray-50 rounded-lg p-4 inline-block">
-                            <p class="font-bold text-lg text-blue-800">금호동물병원</p>
-                            <p class="text-gray-700 mt-1">📞 <a href="tel:062-383-7572" class="hover:underline">062-383-7572</a></p>
-                            <div class="text-sm text-gray-500 mt-2">
-                                <p>평일: 오전 9시 30분 ~ 오후 6시</p>
-                                <p>토요일: 오전 9시 30분 ~ 오후 3시</p>
-                                <p>일요일: 휴무</p>
-                            </div>
-                            <a href="https://pf.kakao.com/_jiICK/chat" target="_blank" class="mt-4 inline-block w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 16 16">
-                                   <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.582 0 0 3.582 0 7.994c0 2.446 1.065 4.635 2.803 6.147L.775 16l2.16-2.053a7.95 7.95 0 0 0 5.059 1.85c4.412 0 7.994-3.582 7.994-7.994a7.85 7.85 0 0 0-2.387-5.614z"/>
-                                </svg>
-                                카카오톡 문의
-                            </a>
-                        </div>
-                        <p class="text-xs text-gray-400 mt-8">저희는 항상 아이가 편안하게 회복할 수 있도록 곁에서 최선을 다하겠습니다.</p>
-                    </footer>
-        
+                    <!-- 보호자 교육 내용이 여기에 삽입됩니다 -->
                 </div>
             </div>
         </div>
