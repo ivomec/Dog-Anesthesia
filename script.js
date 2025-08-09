@@ -212,8 +212,22 @@ function exportPrepSheetAsImage() {
 }
 
 // --- ET Tube 계산기 및 기록 관련 함수 ---
-const weightSizeGuide = [ { weight: 1, size: '3.0' }, { weight: 2, size: '3.5' }, { weight: 3.5, size: '4.0' }, { weight: 4, size: '4.5' }, { weight: 6, size: '5.5' }, { weight: 8, size: '6.0' }, { weight: 9, size: '7.0' }, { weight: 12, size: '7.0' }, { weight: 14, size: '7.5' }, { weight: 20, size: '9.0' }, { weight: 30, size: '11.0' }, { weight: 40, size: '13.0' }];
-const tracheaSizeGuide = [ { diameter: 5.13, id: '2.5' }, { diameter: 5.88, id: '3.0' }, { diameter: 6.63, id: '3.5' }, { diameter: 7.50, id: '4.0' }, { diameter: 8.13, id: '4.5' }, { diameter: 8.38, id: '5.0' }, { diameter: 9.13, id: '5.5' }, { diameter: 10.00, id: '6.0' }, { diameter: 11.38, id: '6.5' }, { diameter: 11.63, id: '7.0' }, { diameter: 12.50, id: '7.5' }, { diameter: 13.38, id: '8.0' }];
+const weightSizeGuide = [
+    { weight: 1, size: '3.0' }, { weight: 2, size: '3.5' },
+    { weight: 3.5, size: '4.0' }, { weight: 4, size: '4.5' },
+    { weight: 6, size: '5.5' }, { weight: 8, size: '6.0' },
+    { weight: 9, size: '7.0' }, { weight: 12, size: '7.0' },
+    { weight: 14, size: '7.5' }, { weight: 20, size: '9.0' },
+    { weight: 30, size: '11.0' }, { weight: 40, size: '13.0' }
+];
+const tracheaSizeGuide = [
+    { diameter: 5.13, id: '2.5' }, { diameter: 5.88, id: '3.0' },
+    { diameter: 6.63, id: '3.5' }, { diameter: 7.50, id: '4.0' },
+    { diameter: 8.13, id: '4.5' }, { diameter: 8.38, id: '5.0' },
+    { diameter: 9.13, id: '5.5' }, { diameter: 10.00, id: '6.0' },
+    { diameter: 11.38, id: '6.5' }, { diameter: 11.63, id: '7.0' },
+    { diameter: 12.50, id: '7.5' }, { diameter: 13.38, id: '8.0' }
+];
 
 function calculateWeightSize() {
     const weightInput = document.getElementById('weight-input');
