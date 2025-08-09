@@ -216,7 +216,7 @@ function populateDischargeTab(weight) {
         if (med.warning === 'renal' && isRenal) {
             medCard.classList.add('highlight-renal');
         }
-        if ((med.note.includes('간') || med.warning === 'liver') && isLiver) {
+        if ((med.note.includes('간') || med.warning === 'liver_support') && isLiver) {
             medCard.classList.add('highlight-liver');
         }
 
@@ -427,7 +427,6 @@ function saveRecords() {
     a.href = url;
     a.click();
     URL.revokeObjectURL(url);
-    alert('기록이 JSON 파일로 저장되었습니다.');
 }
 
 function loadRecords(event) {
@@ -459,11 +458,9 @@ function loadRecords(event) {
             }
             if (data.selectedTubeInfo) selectedTubeInfo = data.selectedTubeInfo;
             
-            alert('기록을 성공적으로 불러왔습니다.');
             calculateAll();
             calculateRemovalDate();
         } catch (error) {
-            alert('오류: 유효하지 않은 JSON 파일입니다.');
             console.error("Failed to parse JSON", error);
         }
     };
@@ -476,8 +473,6 @@ function saveDashboardAsImage() {
     const patientName = document.getElementById('patient_name_main').value || '환자';
     const surgeryDate = document.getElementById('surgery_date').value || new Date().toISOString().split('T')[0];
     const filename = `마취대시보드_${patientName}_${surgeryDate}.png`;
-
-    alert('대시보드 이미지를 생성합니다. 잠시만 기다려주세요...');
 
     html2canvas(captureElement, {
         useCORS: true,
