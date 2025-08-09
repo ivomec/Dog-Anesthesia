@@ -237,7 +237,18 @@
         .ml-3 { margin-left: .75rem }
         .mr-1 { margin-right: .25rem }
         .min-h-\[40px\] { min-height: 40px }
-        .float-right { float: right }
+        #dischargeTab table { width: 100%; border-collapse: collapse; margin-top: 1.25rem; }
+        #dischargeTab th, #dischargeTab td { border: 1px solid #e5e7eb; padding: 0.75rem; text-align: left; vertical-align: middle; font-size: 0.875rem; }
+        #dischargeTab th { background-color: #f3f4f6; color: #374151; font-weight: 600; }
+        #dischargeTab tr:nth-child(even) { background-color: #f9fafb; }
+        #dischargeTab .med-table input[type="number"] { width: 80px; padding: 5px; text-align: center; border-radius: 0.25rem; border: 1px solid #d1d5db;}
+        #dischargeTab .med-table input[type="checkbox"] { width: 1.25rem; height: 1.25rem; }
+        #dischargeTab .highlight-warning { background-color: #fef9c3 !important; }
+        #dischargeTab .summary-box { background-color: #eff6ff; border: 1px solid #60a5fa; border-radius: 0.375rem; padding: 1rem; }
+        #dischargeTab .summary-item .danger { color: #dc2626; font-weight: bold; }
+        #dischargeTab caption { font-size: 1.25rem; margin-bottom: 0.5rem; font-weight: bold; color: #1f2937; caption-side: top; text-align: left; padding-bottom: 0.5rem; border-bottom: 2px solid #60a5fa;}
+        #dischargeTab .caution { color: #e74c3c; font-weight: bold; }
+
         @media (min-width: 640px) {
             .sm\:text-lg { font-size: 1.125rem; line-height: 1.75rem }
             .sm\:text-sm { font-size: .875rem; line-height: 1.25rem }
@@ -284,7 +295,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 items-start">
                 <div>
                     <label for="patient_name_main" class="block text-xl font-semibold text-gray-700 mb-2">환자 이름</label>
-                    <input type="text" id="patient_name_main" placeholder="환자 이름 입력" class="input-field !text-xl" oninput="syncPatientName()">
+                    <input type="text" id="patient_name_main" placeholder="환자 이름 입력" class="input-field !text-xl" oninput="calculateAll()">
                 </div>
                 <div>
                     <label for="surgery_date" class="block text-xl font-semibold text-gray-700 mb-2">수술일</label>
@@ -490,46 +501,118 @@
 
         <div id="dischargeTab" class="tab-content">
             <div class="card p-6 md:p-8">
-                <h2 class="section-title">수술 후 퇴원약 조제 (강아지)</h2>
-                <div class="info-box mb-4">
-                    <p><strong>목표:</strong> 환자 개별 상태에 맞춰 필요한 약물을 선택하고 용량을 조절하여, 정확하고 안전한 퇴원약 조제를 지원합니다.</p>
-                </div>
-
+                <h2 class="section-title">강아지 퇴원약 조제</h2>
+                
                 <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
                     <h3 class="font-bold text-lg text-blue-800 mb-2">환자 정보 (자동 연동)</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <p><strong>이름:</strong> <span id="discharge_patient_name" class="font-semibold"></span></p>
-                        <p><strong>체중:</strong> <span id="discharge_patient_weight" class="font-semibold"></span> kg</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p><strong>이름:</strong> <span id="discharge_patient_name" class="font-semibold">정보 없음</span></p>
+                        <p><strong>체중:</strong> <span id="discharge_patient_weight" class="font-semibold">0</span> kg</p>
+                    </div>
+                </div>
+
+                <div class="card p-6">
+                    <h2 class="section-title">조제 요약</h2>
+                    <div id="discharge_summary" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <!-- 요약 정보가 여기에 동적으로 생성됩니다. -->
                     </div>
                 </div>
                 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- 약물 선택 섹션 -->
-                    <div>
-                        <h3 class="section-title text-lg">1. 약물 선택 및 용량 조절</h3>
-                        <div id="medication_selection_list" class="space-y-3">
-                            <!-- JS로 동적 생성 -->
-                        </div>
-                    </div>
-
-                    <!-- 조제 요약 섹션 -->
-                    <div>
-                        <h3 class="section-title text-lg">2. 조제 요약</h3>
-                        <div class="sticky top-6">
-                             <div class="p-4 rounded-lg bg-gray-50 border">
-                                <h4 class="font-bold text-gray-800 mb-3 text-center border-b pb-2">📋 3일 처방</h4>
-                                <ul id="summary_3_day" class="space-y-2 text-sm">
-                                    <!-- JS로 동적 생성 -->
-                                </ul>
-                            </div>
-                            <div class="p-4 rounded-lg bg-gray-50 border mt-4">
-                                <h4 class="font-bold text-gray-800 mb-3 text-center border-b pb-2">📋 7일 처방</h4>
-                                <ul id="summary_7_day" class="space-y-2 text-sm">
-                                    <!-- JS로 동적 생성 -->
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
+                <div class="space-y-6 mt-6">
+                    <!-- 항생제 -->
+                    <table class="med-table">
+                        <caption>항생제 (Antibiotics)</caption>
+                        <thead>
+                            <tr><th>선택</th><th>약물 이름 (함량)</th><th>투약일</th><th>1회 용량 (mg/kg)</th><th>조제 정보</th><th>주의사항 (강아지)</th></tr>
+                        </thead>
+                        <tbody id="med-list-antibiotics">
+                            <tr data-drug="amoxicillin" data-strength="500" data-unit="cap">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>아목시실린 (500mg)</td><td><input type="number" class="days" value="7" min="1"></td><td><input type="number" class="dose" value="20" step="0.1"> (20-40)</td><td class="total-amount"></td><td class="notes" data-kidney="true">신장 주의.</td>
+                            </tr>
+                            <tr data-drug="clindamycin" data-strength="150" data-unit="cap">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>클린다마이신 (150mg)</td><td><input type="number" class="days" value="7" min="1"></td><td><input type="number" class="dose" value="11" step="0.1"> (11-22)</td><td class="total-amount"></td><td class="notes">뼈, 치과 감염에 탁월.</td>
+                            </tr>
+                            <tr data-drug="doxycycline" data-strength="100" data-unit="T">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>독시사이클린 (100mg)</td><td><input type="number" class="days" value="7" min="1"></td><td><input type="number" class="dose" value="5" step="0.1"> (5-10)</td><td class="total-amount"></td><td class="notes" data-liver="true" data-kidney="true">간/신장 주의.</td>
+                            </tr>
+                            <tr data-drug="metronidazole" data-strength="250" data-unit="T">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>메트로니다졸 (250mg)</td><td><input type="number" class="days" value="7" min="1"></td><td><input type="number" class="dose" value="15" step="0.1"> (15-30)</td><td class="total-amount"></td><td class="notes" data-liver="true"><span class="caution">간 기능 저하 시 신경독성 위험!</span></td>
+                            </tr>
+                            <tr data-drug="enrofloxacin" data-strength="50" data-unit="T">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>엔로플록사신 (50mg)</td><td><input type="number" class="days" value="7" min="1"></td><td><input type="number" class="dose" value="5" step="0.1"> (5-20)</td><td class="total-amount"></td><td class="notes" data-liver="true" data-kidney="true">간/신장 주의.</td>
+                            </tr>
+                            <tr data-drug="marbofloxacin" data-strength="20" data-unit="T" data-special="marbofloxacin">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>마보플록사신 (20mg)</td><td><input type="number" class="days" value="7" min="1"></td><td><input type="number" class="dose" value="2" step="0.1"> mg/kg (1일 1회)</td><td class="total-amount"></td><td class="notes" data-liver="true" data-kidney="true">간/신장 주의.</td>
+                            </tr>
+                            <tr data-drug="cefixime" data-strength="100" data-unit="T">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>세픽심 (100mg)</td><td><input type="number" class="days" value="7" min="1"></td><td><input type="number" class="dose" value="5" step="0.1"> (5-10)</td><td class="total-amount"></td><td class="notes" data-liver="true" data-kidney="true">간/신장 주의.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- 진통소염제 -->
+                    <table class="med-table">
+                         <caption>진통소염제 (Analgesics & Anti-inflammatory)</caption>
+                        <thead><tr><th>선택</th><th>약물 이름 (함량)</th><th>투약일</th><th>1회 용량</th><th>조제 정보</th><th>주의사항 (강아지)</th></tr></thead>
+                        <tbody id="med-list-analgesics">
+                            <tr data-drug="vetrocam" data-special="vetrocam" data-unit="ml">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>베트로캄</td><td><input type="number" class="days" value="3" min="1" max="3"></td><td>첫날: 체중*0.2ml<br>이후: 체중*0.1ml</td><td class="total-amount"></td><td class="notes" data-kidney="true"><span class="caution">5일 이상 금기, 신장 이상시 금기</span></td>
+                            </tr>
+                            <tr data-drug="gabapentin" data-strength="100" data-unit="T">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>가바펜틴 (100mg)</td><td><input type="number" class="days" value="7" min="1"></td><td><input type="number" class="dose" value="10" step="1"> (15-30+) mg/kg</td><td class="total-amount"></td><td class="notes" data-kidney="true" data-liver="true"><span class="caution">신부전 시 용량/간격 조절 필수.</span> 간/신장 주의.</td>
+                            </tr>
+                            <tr data-drug="tramadol" data-strength="50" data-unit="T">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>트라마돌 (50mg)</td><td><input type="number" class="days" value="7" min="1"></td><td><input type="number" class="dose" value="4" step="0.1"> (4-10) mg/kg</td><td class="total-amount"></td><td class="notes" data-liver="true" data-kidney="true">효과 논란 많음. 간/신장 주의.</td>
+                            </tr>
+                            <tr data-drug="acetaminophen" data-strength="500" data-unit="T">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>아세트아미노펜 (500mg)</td><td><input type="number" class="days" value="3" min="1"></td><td><input type="number" class="dose" value="16" step="1"> (단기) mg/kg</td><td class="total-amount"></td><td class="notes" data-liver="true"><span class="caution">간독성 위험! 3일 이내 단기 사용만 고려.</span> 식후 투여.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- 위장약 -->
+                    <table class="med-table">
+                        <caption>위장약 (Gastrointestinal Protectants)</caption>
+                        <thead><tr><th>선택</th><th>약물 이름 (함량)</th><th>투약일</th><th>1회 용량 (mg/kg)</th><th>조제 정보</th><th>주의사항 (강아지)</th></tr></thead>
+                        <tbody id="med-list-gi">
+                             <tr data-drug="famotidine" data-strength="20" data-unit="T">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>파모티딘 (20mg)</td><td><input type="number" class="days" value="7" min="1"></td><td><input type="number" class="dose" value="0.5" step="0.1"> (1-2)</td><td class="total-amount"></td><td class="notes" data-kidney="true">신부전 시 용량 조절 필요.</td>
+                            </tr>
+                            <tr data-drug="misoprostol" data-strength="200" data-unit="T">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>미소프로스톨 (200mcg)</td><td><input type="number" class="days" value="3" min="1"></td><td><input type="number" class="dose" value="3" step="0.1"> (3-5) mcg/kg</td><td class="total-amount"></td><td class="notes"><span class="caution">단위가 mcg임에 반드시 주의!</span></td>
+                            </tr>
+                            <tr data-drug="almagel" data-strength="500" data-unit="T">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>알마겔 (500mg)</td><td><input type="number" class="days" value="7" min="1"></td><td><input type="number" class="dose" value="10" step="1"> (경험적)</td><td class="total-amount"></td><td class="notes" data-kidney="true">다른 약물 흡수 방해. 신부전 시 장기 투여 주의.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- 간 보조제 -->
+                    <table class="med-table">
+                        <caption>간 보조제 (Liver Protectants)</caption>
+                         <thead><tr><th>선택</th><th>약물 이름 (함량)</th><th>투약일</th><th>1회 용량 (mg/kg)</th><th>조제 정보</th><th>주의사항 (강아지)</th></tr></thead>
+                        <tbody id="med-list-liver">
+                            <tr data-drug="udca" data-strength="200" data-unit="T">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>우루사 (UDCA) (200mg)</td><td><input type="number" class="days" value="7" min="1"></td><td><input type="number" class="dose" value="5" step="0.1"> (10-15 mg/kg/day)</td><td class="total-amount"></td><td class="notes">담즙 정체성 간질환에 핵심적. <strong>식후 투여.</strong></td>
+                            </tr>
+                            <tr data-drug="silymarin" data-strength="140" data-unit="T">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>실리마린 (140mg)</td><td><input type="number" class="days" value="7" min="1"></td><td><input type="number" class="dose" value="10" step="1"> (20-50 mg/kg/day)</td><td class="total-amount"></td><td class="notes">항산화/간세포 보호. 갈아서 투여 가능.</td>
+                            </tr>
+                            <tr data-drug="same" data-strength="200" data-special="same" data-unit="T">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>SAMe (200mg)</td><td><input type="number" class="days" value="7" min="1"></td><td>2.5kg당 1/4정 (1일 1회)</td><td class="total-amount"></td><td class="notes"><span class="caution">장용코팅정. 절대 갈지 말고, 공복에 통째로 투여. 냉동보관, 컷팅해서 처방.</span></td>
+                            </tr>
+                            <tr data-drug="paramel" data-special="paramel" data-unit="ml">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>파라멜(액)</td><td><input type="number" class="days" value="7" min="1"></td><td>0.75 ml/kg</td><td class="total-amount"></td><td class="notes">15g 원액 2배 희석 기준 용량. 간 기능 보조 및 고암모니아혈증 개선.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- 항진균제 -->
+                    <table class="med-table">
+                        <caption>항진균제 (Antifungals)</caption>
+                        <thead><tr><th>선택</th><th>약물 이름 (함량)</th><th>투약일</th><th>1회 용량 (mg/kg)</th><th>조제 정보</th><th>주의사항 (강아지)</th></tr></thead>
+                        <tbody id="med-list-antifungals">
+                             <tr data-drug="itraconazole" data-strength="100" data-unit="cap">
+                                <td><input type="checkbox" class="med-checkbox"></td><td>이트라코나졸 (100mg)</td><td><input type="number" class="days" value="7" min="1"></td><td><input type="number" class="dose" value="2.5" step="0.1"> (5-10 mg/kg/day)</td><td class="total-amount"></td><td class="notes" data-liver="true">대표적인 <span class="caution">간 독성 유발 약물. 반드시 음식과 함께 투여.</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
