@@ -87,7 +87,7 @@ function populatePrepTab(weight) {
     }
     const patchCardHTML = `<div class="p-3 bg-yellow-50 rounded-lg"><h4 class="font-bold text-yellow-800">노스판 패치</h4><p><span class="result-value">${patchRecText}</span></p></div>`;
 
-    let butorMl = 0, midaMl = 0, lidoLoadMl = 0, ketaLoadMl_diluted = 0, alfaxanMlMin = 0, alfaxanMlMax = 0, propofolMlMin = 0, propofolMlMax = 0, fluidCorrected = 0, fluidTarget = 0;
+    let butorMl = 0, midaMl = 0, lidoLoadMl = 0, ketaLoadMl_diluted = 0, alfaxanMlMin = 0, alfaxanMlMax = 0, propofolMlMin = 0, propofolMlMax = 0;
     if (weight > 0) {
         butorMl = (0.2 * weight) / concentrations.butorphanol;
         midaMl = (0.2 * weight) / concentrations.midazolam;
@@ -97,15 +97,81 @@ function populatePrepTab(weight) {
         alfaxanMlMax = (2 * weight) / concentrations.alfaxalone;
         propofolMlMin = (2 * weight) / concentrations.propofol;
         propofolMlMax = (6 * weight) / concentrations.propofol;
-        let fluidRate = isCardiac ? 2 : 5;
-        fluidTarget = fluidRate * weight;
-        fluidCorrected = fluidTarget / 0.7;
     }
 
     const alfaxanCard = `<div id="alfaxan_card" class="p-2 bg-indigo-50 rounded-lg transition-all duration-300"><h5 class="font-semibold text-indigo-800">알팍산</h5><p><span class="result-value">${alfaxanMlMin.toFixed(2)}~${alfaxanMlMax.toFixed(2)} mL</span></p>${isCardiac ? '<p class="text-xs font-bold text-green-600 mt-1">❤️ 심장질환 추천</p>' : ''}</div>`;
     const propofolCard = `<div class="p-2 bg-purple-50 rounded-lg"><h5 class="font-semibold text-purple-800">프로포폴</h5><p><span class="result-value">${propofolMlMin.toFixed(2)}~${propofolMlMax.toFixed(2)} mL</span></p><p class="text-xs text-gray-500 mt-1">(2-6 mg/kg)</p></div>`;
 
-    document.getElementById('pre_op_drugs_result').innerHTML = `${antibioticDivHTML}${patchCardHTML}<div class="p-3 bg-blue-50 rounded-lg"><h4 class="font-bold text-blue-800">마취 전 투약</h4><p><span class="result-value">${butorMl.toFixed(2)} mL</span> 부토르파놀</p><p><span class="result-value">${midaMl.toFixed(2)} mL</span> 미다졸람</p></div><div class="p-3 bg-amber-50 rounded-lg"><h4 class="font-bold text-amber-800">LK 부하 용량</h4><p><span class="result-value">${lidoLoadMl.toFixed(2)} mL</span> 리도카인</p><p><span class="result-value">${ketaLoadMl_diluted.toFixed(2)} mL</span> 케타민(희석)</p><p class="text-xs text-gray-600 font-semibold mt-1">※ 케타민(50주) 0.2mL + N/S 0.8mL</p></div><div class="p-3 bg-indigo-50 rounded-lg col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2"><h4 class="font-bold text-indigo-800">도입 마취</h4><div class="grid grid-cols-2 gap-2 mt-2">${alfaxanCard}${propofolCard}</div></div><div class="p-3 bg-cyan-50 rounded-lg"><h4 class="font-bold text-cyan-800">수액 펌프</h4><p><span class="result-value">${fluidCorrected.toFixed(1)} mL/hr</span></p><p class="text-xs text-gray-500 mt-1">(목표: ${fluidTarget.toFixed(1)}mL/hr)</p></div>`;
+    // --- 수액 속도 계산 로직 시작 ---
+    let fluidCardHTML;
+    if (weight > 0) {
+        let rates;
+        let patientStatusText;
+        const isRenal = document.getElementById('status_renal').checked;
+        const isLiver = document.getElementById('status_liver').checked;
+
+        if (isCardiac) {
+            patientStatusText = "심장 질환";
+            rates = {
+                pre: { low: 1.0, high: 2.0 },
+                intra: { low: 1.0, high: 3.0 },
+                post: { text: "< 2.0 또는 중단" }
+            };
+        } else if (isRenal || isLiver) {
+            patientStatusText = isRenal ? "신장 질환" : "간 질환";
+            rates = {
+                pre: { low: 3.0, high: 4.0 },
+                intra: { low: 3.0, high: 5.0 },
+                post: { low: 3.0, high: 4.0 }
+            };
+        } else {
+            patientStatusText = "정상";
+            rates = {
+                pre: { low: 2.0, high: 4.0 },
+                intra: { text: "5.0" },
+                post: { text: "즉시 중단" }
+            };
+        }
+
+        const calcRate = (rate) => {
+            if (rate.low) return `${(rate.low * weight).toFixed(1)}~${(rate.high * weight).toFixed(1)} mL/hr`;
+            if (rate.text === "5.0") return `${(5.0 * weight).toFixed(1)} mL/hr (시작점)`;
+            return rate.text;
+        };
+        
+        const preAnesMlHr = calcRate(rates.pre);
+        const intraAnesMlHr = calcRate(rates.intra);
+        const postAnesMlHr = calcRate(rates.post);
+        
+        fluidCardHTML = `
+        <div class="p-3 bg-cyan-50 rounded-lg">
+            <h4 class="font-bold text-cyan-800 mb-2">수액 속도 가이드</h4>
+            <div class="space-y-1 text-sm">
+                <div class="flex justify-between items-center p-1 bg-white rounded">
+                    <span class="font-semibold text-gray-600">마취 전:</span>
+                    <span class="result-value text-base font-bold">${preAnesMlHr}</span>
+                </div>
+                <div class="flex justify-between items-center p-1 bg-white rounded">
+                    <span class="font-semibold text-gray-600">마취 중:</span>
+                    <span class="result-value text-base font-bold">${intraAnesMlHr}</span>
+                </div>
+                <div class="flex justify-between items-center p-1 bg-white rounded">
+                    <span class="font-semibold text-gray-600">마취 후:</span>
+                    <span class="result-value text-base font-bold">${postAnesMlHr}</span>
+                </div>
+            </div>
+            <p class="text-xs text-cyan-900 mt-2 text-center font-semibold">(${patientStatusText} 환자 기준)</p>
+        </div>`;
+    } else {
+        fluidCardHTML = `
+        <div class="p-3 bg-cyan-50 rounded-lg">
+            <h4 class="font-bold text-cyan-800 mb-2">수액 속도 가이드</h4>
+            <p class="text-gray-600 text-center p-4">체중을 입력해주세요.</p>
+        </div>`;
+    }
+    // --- 수액 속도 계산 로직 끝 ---
+
+    document.getElementById('pre_op_drugs_result').innerHTML = `${antibioticDivHTML}${patchCardHTML}<div class="p-3 bg-blue-50 rounded-lg"><h4 class="font-bold text-blue-800">마취 전 투약</h4><p><span class="result-value">${butorMl.toFixed(2)} mL</span> 부토르파놀</p><p><span class="result-value">${midaMl.toFixed(2)} mL</span> 미다졸람</p></div><div class="p-3 bg-amber-50 rounded-lg"><h4 class="font-bold text-amber-800">LK 부하 용량</h4><p><span class="result-value">${lidoLoadMl.toFixed(2)} mL</span> 리도카인</p><p><span class="result-value">${ketaLoadMl_diluted.toFixed(2)} mL</span> 케타민(희석)</p><p class="text-xs text-gray-600 font-semibold mt-1">※ 케타민(50주) 0.2mL + N/S 0.8mL</p></div><div class="p-3 bg-indigo-50 rounded-lg col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2"><h4 class="font-bold text-indigo-800">도입 마취</h4><div class="grid grid-cols-2 gap-2 mt-2">${alfaxanCard}${propofolCard}</div></div>${fluidCardHTML}`;
     
     document.getElementById('antibiotic_selection').value = antibioticSelection;
     const alfaxanElement = document.getElementById('alfaxan_card');
