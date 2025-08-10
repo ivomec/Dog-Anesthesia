@@ -23,6 +23,33 @@ function syncPatientName() {
     if (dischargeName) dischargeName.textContent = mainName || '정보 없음';
 }
 
+// --- 환자 상태 체크박스 상호 배타 로직 ---
+function handleStatusChange(changedCheckbox) {
+    const healthyCheckbox = document.getElementById('status_healthy');
+    const diseaseCheckboxes = [
+        document.getElementById('status_cardiac'),
+        document.getElementById('status_liver'),
+        document.getElementById('status_renal')
+    ];
+
+    // 클릭된 체크박스가 '건강'이고, 그것이 체크되었을 때
+    if (changedCheckbox.id === 'status_healthy' && changedCheckbox.checked) {
+        // 모든 질병 체크박스를 해제
+        diseaseCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+    } 
+    // 클릭된 체크박스가 질병 관련이고, 그것이 체크되었을 때
+    else if (diseaseCheckboxes.some(cb => cb.id === changedCheckbox.id) && changedCheckbox.checked) {
+        // '건강' 체크박스를 해제
+        healthyCheckbox.checked = false;
+    }
+
+    // 모든 계산을 다시 실행
+    calculateAll();
+}
+
+
 // --- 메인 계산 함수 ---
 function calculateAll() {
     syncPatientName();
@@ -388,22 +415,9 @@ function saveHandoutAsPDF() { window.print(); }
 function saveHandoutAsImage() {
     const captureElement = document.getElementById('captureArea');
     const patientName = document.getElementById('patientName_handout').value || '환자';
-    html2canvas(captureElement, { useCORS: true, scale: 2 }).then(canvas => {
+    html2canvas(captureElement, { useCORS: true, scale: 3 }).then(canvas => {
         const link = document.createElement('a');
         link.download = `${patientName}_통증패치_안내문.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-    });
-}
-
-function exportPrepSheetAsImage() {
-    const captureElement = document.getElementById('prepTab');
-    const weight = document.getElementById('weight').value || '체중미입력';
-    const patientName = document.getElementById('patient_name_main').value || '환자';
-    const filename = `${patientName}_${weight}kg_마취준비시트.png`;
-    html2canvas(captureElement, { useCORS: true, scale: 1.5, backgroundColor: '#f0f4f8' }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = filename;
         link.href = canvas.toDataURL('image/png');
         link.click();
     });
@@ -522,7 +536,7 @@ function saveRecords() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     const patientName = document.getElementById('patient_name_main').value || '환자';
-    const surgeryDate = document.getElementById('surgery_date').value || new Date().toISOString().split('T');
+    const surgeryDate = document.getElementById('surgery_date').value || new Date().toISOString().split('T')[0];
     a.download = `마취기록_${patientName}_${surgeryDate}.json`;
     a.href = url;
     a.click();
@@ -530,7 +544,7 @@ function saveRecords() {
 }
 
 function loadRecords(event) {
-    const file = event.target.files;
+    const file = event.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -551,7 +565,7 @@ function loadRecords(event) {
             }
             calculateAll();
             calculateRemovalDate();
-        } catch (error) { console.error("Failed to parse JSON", error); }
+        } catch (error) { console.error("Failed to parse JSON", error); alert('기록 파일을 불러오는 데 실패했습니다.'); }
     };
     reader.readAsText(file);
     event.target.value = '';
@@ -560,9 +574,9 @@ function loadRecords(event) {
 function saveDashboardAsImage() {
     const captureElement = document.getElementById('dashboard-capture-area');
     const patientName = document.getElementById('patient_name_main').value || '환자';
-    const surgeryDate = document.getElementById('surgery_date').value || new Date().toISOString().split('T');
+    const surgeryDate = document.getElementById('surgery_date').value || new Date().toISOString().split('T')[0];
     const filename = `마취대시보드_${patientName}_${surgeryDate}.png`;
-    html2canvas(captureElement, { useCORS: true, scale: 1.5, backgroundColor: '#f0f4f8' }).then(canvas => {
+    html2canvas(captureElement, { useCORS: true, scale: 2, backgroundColor: '#f0f4f8' }).then(canvas => {
         const link = document.createElement('a');
         link.download = filename;
         link.href = canvas.toDataURL('image/png');
