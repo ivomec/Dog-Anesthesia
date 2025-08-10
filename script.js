@@ -1,6 +1,11 @@
 // --- 전역 변수 및 상수 ---
 const concentrations = { lidocaine: 20, ketamine: 50, ketamine_diluted: 10, bupivacaine: 5, butorphanol: 10, midazolam: 5, alfaxalone: 10, propofol: 10, atropine: 0.5, dobutamine_raw: 12.5, epinephrine: 1, };
 let selectedTubeInfo = { size: null, cuff: false, notes: '' };
+let anesthesiaTimerInterval = null;
+let anesthesiaStartTime = 0;
+let anesthesiaElapsedTime = 0; // in milliseconds
+let isAnesthesiaTimerRunning = false;
+
 
 // --- 탭 관리 함수 ---
 function openTab(evt, tabName) {
@@ -517,6 +522,54 @@ function updateTubeDisplay() {
     }
 }
 
+// --- 마취 타이머 기능 ---
+function formatTime(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+function updateAnesthesiaTimerDisplay() {
+    const currentTime = Date.now();
+    const elapsedTime = anesthesiaElapsedTime + (currentTime - anesthesiaStartTime);
+    document.getElementById('anesthesia-time-display').textContent = formatTime(elapsedTime);
+}
+
+function startAnesthesiaTimer() {
+    if (isAnesthesiaTimerRunning) return;
+    isAnesthesiaTimerRunning = true;
+    anesthesiaStartTime = Date.now();
+    anesthesiaTimerInterval = setInterval(updateAnesthesiaTimerDisplay, 1000);
+    
+    document.getElementById('timer-start-btn').disabled = true;
+    document.getElementById('timer-pause-btn').disabled = false;
+}
+
+function pauseAnesthesiaTimer() {
+    if (!isAnesthesiaTimerRunning) return;
+    isAnesthesiaTimerRunning = false;
+    clearInterval(anesthesiaTimerInterval);
+    const currentTime = Date.now();
+    anesthesiaElapsedTime += (currentTime - anesthesiaStartTime);
+
+    document.getElementById('timer-start-btn').disabled = false;
+    document.getElementById('timer-pause-btn').disabled = true;
+}
+
+function resetAnesthesiaTimer() {
+    clearInterval(anesthesiaTimerInterval);
+    isAnesthesiaTimerRunning = false;
+    anesthesiaElapsedTime = 0;
+    anesthesiaStartTime = 0;
+    document.getElementById('anesthesia-time-display').textContent = '00:00:00';
+
+    document.getElementById('timer-start-btn').disabled = false;
+    document.getElementById('timer-pause-btn').disabled = true;
+}
+
+
 // --- 데이터 저장/불러오기/이미지 저장 기능 ---
 const a_input_ids = ['patient_name_main', 'surgery_date', 'weight', 'dog_block_sites', 'lk_cri_rate_mcg', 'dobutamine_dose_select', 'selectedEtTubeSize', 'selectedEtTubeNotes', 'patientName_handout', 'attachDate', 'attachTime', 'antibiotic_selection'];
 const a_checkbox_ids = ['status_healthy', 'status_cardiac', 'status_liver', 'status_renal', 'selectedEtTubeCuff'];
@@ -525,12 +578,22 @@ function saveRecords() {
     const data = {};
     a_input_ids.forEach(id => { const element = document.getElementById(id); if (element) data[id] = element.value; });
     a_checkbox_ids.forEach(id => { const element = document.getElementById(id); if (element) data[id] = element.checked; });
+    
     data.selectedTubeInfo = selectedTubeInfo;
+    
+    data.isAnesthesiaTimerRunning = isAnesthesiaTimerRunning;
+    if (isAnesthesiaTimerRunning) {
+        data.anesthesiaElapsedTime = anesthesiaElapsedTime + (Date.now() - anesthesiaStartTime);
+    } else {
+        data.anesthesiaElapsedTime = anesthesiaElapsedTime;
+    }
+
     data.dischargeMedsV2 = [];
     document.querySelectorAll('#dischargeTab .med-checkbox').forEach(cb => {
         const row = cb.closest('tr');
         data.dischargeMedsV2.push({ drug: row.dataset.drug, checked: cb.checked, days: row.querySelector('.days').value, dose: row.querySelector('.dose')?.value });
     });
+
     const jsonString = JSON.stringify(data, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -552,7 +615,21 @@ function loadRecords(event) {
             const data = JSON.parse(e.target.result);
             a_input_ids.forEach(id => { const element = document.getElementById(id); if (element && data[id] !== undefined) element.value = data[id]; });
             a_checkbox_ids.forEach(id => { const element = document.getElementById(id); if (element && data[id] !== undefined) element.checked = data[id]; });
+            
             if (data.selectedTubeInfo) selectedTubeInfo = data.selectedTubeInfo;
+            
+            clearInterval(anesthesiaTimerInterval);
+            isAnesthesiaTimerRunning = false;
+            anesthesiaElapsedTime = data.anesthesiaElapsedTime || 0;
+            
+            if (data.isAnesthesiaTimerRunning) {
+                startAnesthesiaTimer();
+            } else {
+                document.getElementById('anesthesia-time-display').textContent = formatTime(anesthesiaElapsedTime);
+                document.getElementById('timer-start-btn').disabled = false;
+                document.getElementById('timer-pause-btn').disabled = true;
+            }
+
             if(data.dischargeMedsV2) {
                 data.dischargeMedsV2.forEach(medData => {
                     const row = document.querySelector(`#dischargeTab tr[data-drug="${medData.drug}"]`);
@@ -563,6 +640,7 @@ function loadRecords(event) {
                     }
                 });
             }
+
             calculateAll();
             calculateRemovalDate();
         } catch (error) { console.error("Failed to parse JSON", error); alert('기록 파일을 불러오는 데 실패했습니다.'); }
@@ -628,4 +706,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('calculate-trachea-btn').addEventListener('click', calculateTracheaSize);
     document.getElementById('trachea-input').addEventListener('keydown', (event) => { if (event.key === 'Enter') calculateTracheaSize(); });
     document.getElementById('saveEtTubeSelection').addEventListener('click', saveAndDisplayTubeSelection);
+    
+    // Timer Event Listeners
+    document.getElementById('timer-start-btn').addEventListener('click', startAnesthesiaTimer);
+    document.getElementById('timer-pause-btn').addEventListener('click', pauseAnesthesiaTimer);
+    document.getElementById('timer-reset-btn').addEventListener('click', resetAnesthesiaTimer);
+    document.getElementById('timer-pause-btn').disabled = true;
+
 });
