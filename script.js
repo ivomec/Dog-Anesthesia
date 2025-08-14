@@ -123,8 +123,14 @@ function populatePrepTab(weight) {
     if (weight > 0) {
         butorMl = (0.2 * weight) / concentrations.butorphanol;
         midaMl = (0.2 * weight) / concentrations.midazolam;
-        lidoLoadMl = (1 * weight) / concentrations.lidocaine;
-        ketaLoadMl_diluted = (0.5 * weight) / concentrations.ketamine_diluted;
+        
+        // --- START: 요청에 따라 수정된 부분 ---
+        // 기존: lidoLoadMl = (1 * weight) / concentrations.lidocaine;
+        // 기존: ketaLoadMl_diluted = (0.5 * weight) / concentrations.ketamine_diluted;
+        lidoLoadMl = (0.5 * weight) / concentrations.lidocaine; // 리도카인 용량을 50% 줄임 (1 -> 0.5 mg/kg)
+        ketaLoadMl_diluted = (0.25 * weight) / concentrations.ketamine_diluted; // 케타민 용량을 50% 줄임 (0.5 -> 0.25 mg/kg)
+        // --- END: 수정된 부분 ---
+
         alfaxanMlMin = (1 * weight) / concentrations.alfaxalone;
         alfaxanMlMax = (2 * weight) / concentrations.alfaxalone;
         propofolMlMin = (2 * weight) / concentrations.propofol;
